@@ -1,0 +1,32 @@
+{
+  "search_enabled": true,
+  "search_source": "github",
+  "max_iterations": 25,
+  "learning_enabled": false,
+  "learning_interval_sec": 120,
+  "github_token": "",
+  "skill_library_enabled": true,
+  "enhanced_memory_enabled": true,
+  "self_improve_enabled": true,
+  "self_improve_modify": false,
+  "auto_discover_agents": true,
+  "learning_topics": [
+    "python pygame game development",
+    "python flask rest api",
+    "python cli tool argparse",
+    "python async asyncio",
+    "python error handling best practices",
+    "python unittest pytest",
+    "python design patterns",
+    "python web scraping beautifulsoup",
+    "python data structure algorithm",
+    "python file operations pathlib"
+  ],
+  "llm_api_url": "http://localhost:1234/v1",
+  "llm_model": "local-model",
+  "llm_timeout": 300,
+  "ui_language": "zh",
+  "ui_dark_mode": false,
+  "agent_mode_default": true,
+  "disabled_agents": []
+}

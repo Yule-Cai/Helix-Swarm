@@ -1,0 +1,83 @@
+{
+  "idx": 20,
+  "total_learned": 19,
+  "completed_topics": [
+    {
+      "topic": "python pygame game development",
+      "learned_at": "2026-04-11 17:14:10"
+    },
+    {
+      "topic": "python cli tool argparse",
+      "learned_at": "2026-04-11 17:31:21"
+    },
+    {
+      "topic": "python async asyncio",
+      "learned_at": "2026-04-11 17:40:03"
+    },
+    {
+      "topic": "python error handling best practices",
+      "learned_at": "2026-04-11 17:47:59"
+    },
+    {
+      "topic": "python unittest pytest",
+      "learned_at": "2026-04-11 17:56:24"
+    },
+    {
+      "topic": "python design patterns",
+      "learned_at": "2026-04-11 18:04:20"
+    },
+    {
+      "topic": "python web scraping beautifulsoup",
+      "learned_at": "2026-04-11 18:13:05"
+    },
+    {
+      "topic": "python data structure algorithm",
+      "learned_at": "2026-04-11 18:21:49"
+    },
+    {
+      "topic": "python file operations pathlib",
+      "learned_at": "2026-04-11 18:30:01"
+    },
+    {
+      "topic": "python pygame game development",
+      "learned_at": "2026-04-11 18:37:24"
+    },
+    {
+      "topic": "python flask rest api",
+      "learned_at": "2026-04-11 18:45:34"
+    },
+    {
+      "topic": "python cli tool argparse",
+      "learned_at": "2026-04-11 18:52:52"
+    },
+    {
+      "topic": "python async asyncio",
+      "learned_at": "2026-04-11 19:01:33"
+    },
+    {
+      "topic": "python error handling best practices",
+      "learned_at": "2026-04-11 19:08:44"
+    },
+    {
+      "topic": "python unittest pytest",
+      "learned_at": "2026-04-11 19:15:49"
+    },
+    {
+      "topic": "python design patterns",
+      "learned_at": "2026-04-11 19:22:48"
+    },
+    {
+      "topic": "python web scraping beautifulsoup",
+      "learned_at": "2026-04-11 19:31:29"
+    },
+    {
+      "topic": "python data structure algorithm",
+      "learned_at": "2026-04-11 19:39:35"
+    },
+    {
+      "topic": "python file operations pathlib",
+      "learned_at": "2026-04-11 19:48:07"
+    }
+  ],
+  "last_saved": "2026-04-11 19:48:08"
+}
