@@ -47,7 +47,7 @@ class LLMClient:
         api_url:     str = "http://localhost:1234/v1",
         model_name:  str = "local-model",
         api_key:     str = "not-needed",
-        timeout:     int = 300,
+        timeout:     int = 600,      # 本地模型生成慢，给足时间
         max_retries: int = 3,
     ):
         self.model_name  = model_name
