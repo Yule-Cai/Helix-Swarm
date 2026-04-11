@@ -1,14 +1,20 @@
 """
 TerminalAgent — 终端命令执行器
 修复：
-  1. 用 LLM 从自然语言指令中提取真正的 shell 命令，不再直接执行指令原文
+  1. 用 LLM 从自然语言指令中提取真正的 shell 命令
   2. pip install / python 命令自动替换为 sys.executable 路径（跨平台）
-  3. 提取失败时用正则兜底识别常见命令模式
+  3. 提取失败时跳过（返回 ✅），不触发重规划
+  4. 防止 list index out of range 和 bad escape 错误
 """
 import subprocess
 import sys
 import os
 import re
+
+def _first_line(s: str) -> str:
+    """安全取第一行，空字符串返回空字符串。"""
+    lines = (s or '').strip().splitlines()
+    return lines[0].strip() if lines else ''
 
 class TerminalAgent:
     BLACKLIST = ["rm -rf /", "mkfs", "dd ", "sudo rm", "shutdown", "reboot", "format c:"]
@@ -17,36 +23,31 @@ class TerminalAgent:
         self.llm = llm_client
 
     def run(self, instruction: str, workspace_dir: str = "workspace") -> str:
-        # 1. 从指令中提取实际命令
         cmd = self._extract_command(instruction)
         if not cmd:
-            # 没有具体命令时跳过，不算失败（避免触发重规划）
-            return f"✅ 无需安装额外依赖（未找到具体命令），跳过。"
+            return "✅ 无需安装额外依赖（未找到具体命令），跳过。"
 
-        # 2. 黑名单检查
         for blk in self.BLACKLIST:
             if blk in cmd:
                 return f"❌ 拒绝执行高危命令：{blk}"
 
-        # 3. cd xxx && cmd 模式
+        # cd xxx && cmd 模式
         m = re.search(r'cd\s+(\S+)\s*&&\s*(.*)', cmd)
         if m:
             workspace_dir = os.path.join(workspace_dir, m.group(1))
             cmd = m.group(2).strip()
 
-        # 4. 先判断是否全局命令（pip/npm等不需要 workspace_dir 作为 cwd）
-        #    必须在替换 pip→python 之前判断，否则 first_word 会变成 python 路径
+        # 先判断是否全局命令（必须在替换 pip→python 之前）
         _global_cmds = {"pip", "pip3", "conda", "npm", "node", "git", "brew", "apt", "cargo"}
-        first_word = cmd.strip().split()[0].lower() if cmd.strip() else ""
+        first_word = cmd.strip().split()[0].lower() if cmd.strip().split() else ''
         is_global = first_word in _global_cmds
         cwd = None if is_global else workspace_dir
         if not is_global:
             os.makedirs(workspace_dir, exist_ok=True)
 
-        # 5. 用 sys.executable 替换 python / pip
+        # 替换 python / pip 为绝对路径（用 lambda 避免替换字符串被当正则）
         py  = sys.executable
         pip = f'"{py}" -m pip'
-        # 用 lambda 替换，避免替换字符串被当作正则（防止 \P 之类报错）
         cmd = re.sub(r'\bpip3?\b',    lambda m: pip,       cmd)
         cmd = re.sub(r'\bpython3?\b', lambda m: f'"{py}"', cmd)
 
@@ -70,50 +71,52 @@ class TerminalAgent:
 
     def _extract_command(self, instruction: str) -> str:
         """从自然语言指令中提取真正的 shell 命令。"""
-
-        # 只取指令前500字符，避免 Windows 路径等特殊字符干扰正则
         text = instruction[:500]
 
-        # ① 优先：代码块里的命令
+        # ① 代码块优先
         m = re.search(r'```(?:bash|shell|sh|cmd|powershell)?\s*\n?(.*?)```', text, re.DOTALL)
         if m:
-            return m.group(1).strip().splitlines()[0].strip()
+            line = _first_line(m.group(1))
+            if line:
+                return line
 
-        # ② 正则兜底：逐行扫描，找第一个看起来像命令的行
+        # ② 逐行扫描：找第一个已知命令开头的行
+        known = {'pip', 'pip3', 'python', 'python3', 'npm', 'node',
+                 'git', 'conda', 'brew', 'apt', 'cargo', 'go'}
         for line in text.splitlines():
             line = line.strip().lstrip('$').strip()
             if not line:
                 continue
-            first = line.split()[0].lower() if line.split() else ''
-            # 直接匹配已知命令开头
-            if first in {'pip', 'pip3', 'python', 'python3', 'npm', 'node',
-                         'git', 'conda', 'brew', 'apt', 'cargo', 'go'}:
+            parts = line.split()
+            if not parts:
+                continue
+            if parts[0].lower() in known:
                 return line
-            # pip install 模式
-            try:
-                m2 = re.search(r'pip3?\s+install\s+[\w\-\[\],\s>=<.]+', line, re.IGNORECASE)
-                if m2:
-                    return m2.group(0).strip()
-            except re.error:
-                pass
+            # pip install 子串匹配（不用正则，避免 bad escape）
+            low = line.lower()
+            if 'pip install' in low or 'pip3 install' in low:
+                # 提取从 pip 开始的部分
+                idx = low.find('pip')
+                return line[idx:].strip()
 
-        # ③ LLM 提取（最后手段）
+        # ③ LLM 提取
         if self.llm:
-            result = self.llm.chat(
-                "你是命令提取器。从用户指令中提取需要执行的 shell 命令。\n"
-                "只输出命令本身，不要解释，不要加代码块标记。\n"
-                "如果是安装包，输出 pip install xxx 格式。\n"
-                "如果无法识别，输出：NONE",
-                instruction[:200],
-                temperature=0.0,
-                max_tokens=80,
-            )
-            result = (result or '').strip().strip("`").splitlines()[0].strip()
-            if result and result.upper() != "NONE" and len(result) < 200:
-                first_word = result.split()[0].lower() if result.split() else ""
-                known_cmds = {"pip", "python", "python3", "npm", "node", "git",
-                              "pip3", "conda", "brew", "apt", "cargo", "go"}
-                if first_word in known_cmds:
-                    return result
+            try:
+                result = self.llm.chat(
+                    "你是命令提取器。从用户指令中提取需要执行的 shell 命令。\n"
+                    "只输出命令本身（如 pip install xxx），不要解释，不要加代码块标记。\n"
+                    "如果没有具体的包需要安装或没有明确命令，输出：NONE",
+                    instruction[:200],
+                    temperature=0.0,
+                    max_tokens=60,
+                )
+                line = _first_line(result)
+                line = line.strip('`').strip()
+                if line and line.upper() != 'NONE' and len(line) < 200:
+                    parts = line.split()
+                    if parts and parts[0].lower() in known:
+                        return line
+            except Exception:
+                pass
 
         return ""
