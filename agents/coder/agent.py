@@ -12,7 +12,7 @@ import re
 import shutil
 
 # 依次尝试的 token 上限，本地模型大 context 容易超时
-_TOKEN_LADDER = [4096, 2048, 1024]
+_TOKEN_LADDER = [8192, 4096, 2048]
 
 class CoderAgent:
     def __init__(self, llm_client):
