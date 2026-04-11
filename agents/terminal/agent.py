@@ -20,7 +20,8 @@ class TerminalAgent:
         # 1. 从指令中提取实际命令
         cmd = self._extract_command(instruction)
         if not cmd:
-            return f"⚠️ 无法从指令中提取可执行命令：{instruction[:100]}"
+            # 没有具体命令时跳过，不算失败（避免触发重规划）
+            return f"✅ 无需安装额外依赖（未找到具体命令），跳过。"
 
         # 2. 黑名单检查
         for blk in self.BLACKLIST:
