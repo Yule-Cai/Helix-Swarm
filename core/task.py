@@ -103,6 +103,7 @@ class TaskPlanner:
 8. 遇到陌生API或需要调用外部服务时，用mcp连接对应MCP Server
 9. 需要封装第三方GitHub项目或独立脚本为能力时，用plugin处理
 10. 用户提到图片/截图/UI设计稿时，在指令中说明图片路径，让coder参考图片编写代码
+11. 【重要】游戏、复杂程序等大型任务，coder指令必须明确要求"代码简洁，控制在100行以内"，避免LLM超时
 
 【并行规划示例】需要搜索+安装依赖+写代码时，正确结构：
 t0(viewer) → t1(searcher,depends:[t0]) 和 t2(terminal,depends:[t0]) 并行 → t3(coder,depends:[t1,t2])
