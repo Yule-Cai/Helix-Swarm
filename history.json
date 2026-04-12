@@ -1,8 +1,37 @@
 [
   {
-    "id": "f94c1456-ac88-4127-bff1-57d883a4c020",
+    "id": "cae4cdde-3fde-47f6-b609-e8ab64d1a1fc",
     "title": "写一个命令行版贪吃蛇",
-    "messages": [],
-    "created_at": "2026-04-11 23:51"
+    "messages": [
+      {
+        "role": "user",
+        "body": "写一个命令行版贪吃蛇"
+      },
+      {
+        "role": "system",
+        "title": "🔮 技能库命中",
+        "body": "找到相关技能：**Python**\n关键词：命令行, 字符串, 循环, 游戏, 贪吃蛇\n置信度：60%",
+        "kind": "info"
+      },
+      {
+        "role": "planner",
+        "title": "Planner · 规划中",
+        "body": "正在生成结构化任务图…",
+        "kind": "running"
+      },
+      {
+        "role": "planner",
+        "title": "Planner · 任务图就绪",
+        "body": "项目：clisnakegame\n共 5 个任务\n\n⏳ [t0] viewer: 扫描工作区结构，了解当前环境。\n⏳ [t1] searcher: 搜索如何使用Python编写命令行游戏（如贪吃蛇），重点查找处理终端输入、屏幕刷新和定时循环的库或方\n⏳ [t2] terminal: 根据搜索结果确认并安装任何必要的Python依赖（如如果需要特定的游戏开发库）。\n⏳ [t3] coder: 编写一个完整的命令行版贪吃蛇游戏。代码必须使用Python，实现蛇的移动、食物生成、碰撞检测（墙壁和\n⏳ [t4] tester: 运行编写的贪吃蛇游戏代码，验证其核心功能是否正常（移动、吃到食物、碰撞死亡等）。",
+        "kind": "result"
+      },
+      {
+        "role": "system",
+        "title": "✨ 技能已封装",
+        "body": "本次任务已存入技能库，下次类似需求可直接复用。",
+        "kind": "info"
+      }
+    ],
+    "created_at": "2026-04-12 01:23"
   }
 ]

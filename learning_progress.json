@@ -1,6 +1,6 @@
 {
-  "idx": 20,
-  "total_learned": 19,
+  "idx": 73,
+  "total_learned": 70,
   "completed_topics": [
     {
       "topic": "python pygame game development",
@@ -77,7 +77,211 @@
     {
       "topic": "python file operations pathlib",
       "learned_at": "2026-04-11 19:48:07"
+    },
+    {
+      "topic": "python pygame game development",
+      "learned_at": "2026-04-12 01:53:15"
+    },
+    {
+      "topic": "python flask rest api",
+      "learned_at": "2026-04-12 02:05:03"
+    },
+    {
+      "topic": "python cli tool argparse",
+      "learned_at": "2026-04-12 02:15:28"
+    },
+    {
+      "topic": "python async asyncio",
+      "learned_at": "2026-04-12 02:26:01"
+    },
+    {
+      "topic": "python error handling best practices",
+      "learned_at": "2026-04-12 02:35:48"
+    },
+    {
+      "topic": "python unittest pytest",
+      "learned_at": "2026-04-12 02:46:08"
+    },
+    {
+      "topic": "python design patterns",
+      "learned_at": "2026-04-12 02:55:53"
+    },
+    {
+      "topic": "python web scraping beautifulsoup",
+      "learned_at": "2026-04-12 03:06:27"
+    },
+    {
+      "topic": "python data structure algorithm",
+      "learned_at": "2026-04-12 03:17:24"
+    },
+    {
+      "topic": "python file operations pathlib",
+      "learned_at": "2026-04-12 03:27:43"
+    },
+    {
+      "topic": "python pygame game development",
+      "learned_at": "2026-04-12 03:36:57"
+    },
+    {
+      "topic": "python flask rest api",
+      "learned_at": "2026-04-12 03:47:07"
+    },
+    {
+      "topic": "python cli tool argparse",
+      "learned_at": "2026-04-12 03:56:24"
+    },
+    {
+      "topic": "python async asyncio",
+      "learned_at": "2026-04-12 04:07:14"
+    },
+    {
+      "topic": "python error handling best practices",
+      "learned_at": "2026-04-12 04:16:21"
+    },
+    {
+      "topic": "python unittest pytest",
+      "learned_at": "2026-04-12 04:25:26"
+    },
+    {
+      "topic": "python design patterns",
+      "learned_at": "2026-04-12 04:34:24"
+    },
+    {
+      "topic": "python web scraping beautifulsoup",
+      "learned_at": "2026-04-12 04:44:31"
+    },
+    {
+      "topic": "python data structure algorithm",
+      "learned_at": "2026-04-12 04:55:34"
+    },
+    {
+      "topic": "python file operations pathlib",
+      "learned_at": "2026-04-12 05:04:43"
+    },
+    {
+      "topic": "python pygame game development",
+      "learned_at": "2026-04-12 05:13:50"
+    },
+    {
+      "topic": "python flask rest api",
+      "learned_at": "2026-04-12 05:24:02"
+    },
+    {
+      "topic": "python cli tool argparse",
+      "learned_at": "2026-04-12 05:33:15"
+    },
+    {
+      "topic": "python async asyncio",
+      "learned_at": "2026-04-12 05:44:03"
+    },
+    {
+      "topic": "python error handling best practices",
+      "learned_at": "2026-04-12 05:52:57"
+    },
+    {
+      "topic": "python unittest pytest",
+      "learned_at": "2026-04-12 06:01:58"
+    },
+    {
+      "topic": "python design patterns",
+      "learned_at": "2026-04-12 06:10:56"
+    },
+    {
+      "topic": "python web scraping beautifulsoup",
+      "learned_at": "2026-04-12 06:21:51"
+    },
+    {
+      "topic": "python data structure algorithm",
+      "learned_at": "2026-04-12 06:31:02"
+    },
+    {
+      "topic": "python file operations pathlib",
+      "learned_at": "2026-04-12 06:40:09"
+    },
+    {
+      "topic": "python pygame game development",
+      "learned_at": "2026-04-12 06:49:27"
+    },
+    {
+      "topic": "python flask rest api",
+      "learned_at": "2026-04-12 06:59:30"
+    },
+    {
+      "topic": "python cli tool argparse",
+      "learned_at": "2026-04-12 07:08:45"
+    },
+    {
+      "topic": "python async asyncio",
+      "learned_at": "2026-04-12 07:19:33"
+    },
+    {
+      "topic": "python error handling best practices",
+      "learned_at": "2026-04-12 07:28:42"
+    },
+    {
+      "topic": "python unittest pytest",
+      "learned_at": "2026-04-12 07:37:36"
+    },
+    {
+      "topic": "python design patterns",
+      "learned_at": "2026-04-12 07:46:37"
+    },
+    {
+      "topic": "python web scraping beautifulsoup",
+      "learned_at": "2026-04-12 07:55:52"
+    },
+    {
+      "topic": "python data structure algorithm",
+      "learned_at": "2026-04-12 08:06:43"
+    },
+    {
+      "topic": "python file operations pathlib",
+      "learned_at": "2026-04-12 08:15:41"
+    },
+    {
+      "topic": "python pygame game development",
+      "learned_at": "2026-04-12 08:24:43"
+    },
+    {
+      "topic": "python flask rest api",
+      "learned_at": "2026-04-12 08:34:38"
+    },
+    {
+      "topic": "python cli tool argparse",
+      "learned_at": "2026-04-12 08:43:35"
+    },
+    {
+      "topic": "python error handling best practices",
+      "learned_at": "2026-04-12 09:02:47"
+    },
+    {
+      "topic": "python unittest pytest",
+      "learned_at": "2026-04-12 09:11:41"
+    },
+    {
+      "topic": "python design patterns",
+      "learned_at": "2026-04-12 09:20:22"
+    },
+    {
+      "topic": "python web scraping beautifulsoup",
+      "learned_at": "2026-04-12 09:30:08"
+    },
+    {
+      "topic": "python data structure algorithm",
+      "learned_at": "2026-04-12 09:40:46"
+    },
+    {
+      "topic": "python file operations pathlib",
+      "learned_at": "2026-04-12 09:49:40"
+    },
+    {
+      "topic": "python pygame game development",
+      "learned_at": "2026-04-12 09:58:37"
+    },
+    {
+      "topic": "python flask rest api",
+      "learned_at": "2026-04-12 10:08:33"
     }
   ],
-  "last_saved": "2026-04-11 19:48:08"
+  "last_saved": "2026-04-12 10:16:57"
 }

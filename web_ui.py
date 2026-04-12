@@ -315,21 +315,27 @@ def run():
             # ── DEV 路径 ─────────────────────────────────────
             # 1. 技能库召回
             skill_hint = ""
+            matched_skill = None
             if _cfg.get("skill_library_enabled", True):
-                skill = _skill_library.find_relevant_skill(user_input)
-                if skill:
+                matched_skill = _skill_library.find_relevant_skill(user_input)
+                if matched_skill:
+                    confidence = matched_skill.get("_confidence", 0)
                     skill_hint = (
                         "已有相关技能参考：" +
-                        " → ".join(s.get("agent", "") for s in skill.get("steps", [])[:6])
+                        " → ".join(s.get("agent", "") for s in matched_skill.get("steps", [])[:6])
                     )
+                    can_reuse = _skill_library.can_reuse_graph(matched_skill)
                     bus.publish(EventType.SKILL_HIT, {
-                        "skill_name": skill["name"],
-                        "keywords":   skill.get("keywords", []),
+                        "skill_name": matched_skill["name"],
+                        "keywords":   matched_skill.get("keywords", []),
+                        "confidence": confidence,
                     }, trace=root_trace)
                     emit("system", "🔮 技能库命中",
-                         f"找到相关技能：**{skill['name']}**\n"
-                         f"关键词：{', '.join(skill.get('keywords', []))}\n"
-                         f"参考步骤：{skill_hint}", "info")
+                         f"找到相关技能：**{matched_skill['name']}**\n"
+                         f"关键词：{', '.join(matched_skill.get('keywords', []))}\n"
+                         f"置信度：{confidence:.0%}"
+                         + ("  ⚡ 直接复用任务图（跳过规划）" if can_reuse else ""),
+                         "info")
 
             # 2. 记忆召回（ChromaDB 向量 + JSON 双后端）
             mem_ctx = _global_memory.recall(user_input)
@@ -338,18 +344,25 @@ def run():
             enhanced_mem = None
 
             # 4. 规划任务图
-            emit("planner", "Planner · 规划中", "正在生成结构化任务图…", "running")
-            planner   = TaskPlanner(llm)
-            ui_lang   = _cfg.get("ui_language", "zh")
-            plan_input = user_input
-            if image_paths:
-                img_names = ", ".join(os.path.basename(p) for p in image_paths)
-                plan_input += (f"\n\n[Attached images in workspace]: {img_names}"
-                               if ui_lang == "en"
-                               else f"\n\n【附带图片】用户上传了以下图片（已在workspace中）：{img_names}，请在需要时参考这些图片。")
-            if ui_lang == "en":
-                plan_input += "\n\n[Language requirement] All agent instructions, code comments, README, and outputs MUST be in English."
-            graph = planner.plan(plan_input, skill_hint=skill_hint, memory=_global_memory)
+            planner = TaskPlanner(llm)
+            ui_lang = _cfg.get("ui_language", "zh")
+
+            # 技能库高置信度命中时直接复用任务图，跳过 Planner LLM 调用
+            if matched_skill and _skill_library.can_reuse_graph(matched_skill):
+                emit("planner", "⚡ Planner · 跳过规划", "技能库高置信度命中，直接复用历史任务图…", "info")
+                graph = planner.rebuild_from_skill(user_input, matched_skill)
+                _skill_library.update_usage(matched_skill["id"])
+            else:
+                emit("planner", "Planner · 规划中", "正在生成结构化任务图…", "running")
+                plan_input = user_input
+                if image_paths:
+                    img_names = ", ".join(os.path.basename(p) for p in image_paths)
+                    plan_input += (f"\n\n[Attached images in workspace]: {img_names}"
+                                   if ui_lang == "en"
+                                   else f"\n\n【附带图片】用户上传了以下图片（已在workspace中）：{img_names}，请在需要时参考这些图片。")
+                if ui_lang == "en":
+                    plan_input += "\n\n[Language requirement] All agent instructions, code comments, README, and outputs MUST be in English."
+                graph = planner.plan(plan_input, skill_hint=skill_hint, memory=_global_memory)
 
             bus.publish(EventType.TASK_PLAN, {
                 "project":  graph.project,
@@ -394,7 +407,8 @@ def run():
                              for t in graph.tasks if t.result]
                     _skill_library.create_skill(
                         user_input, steps,
-                        graph.tasks[-1].result if graph.tasks else "", llm
+                        graph.tasks[-1].result if graph.tasks else "", llm,
+                        task_graph=graph,   # ← 存储完整任务图
                     )
                     bus.publish(EventType.SKILL_CREATED, {
                         "project": graph.project,

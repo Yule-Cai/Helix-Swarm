@@ -217,5 +217,85 @@
     "success_count": 1,
     "created_at": "2026-04-11 21:41:06",
     "last_used": "2026-04-11 21:41:06"
+  },
+  "skill_1775928884": {
+    "id": "skill_1775928884",
+    "name": "",
+    "description": "写一个命令行版贪吃蛇",
+    "keywords": [],
+    "steps": [
+      {
+        "agent": "viewer",
+        "instruction": "扫描工作区结构，了解当前环境。",
+        "result": "📁 目录结构：\n(空)"
+      },
+      {
+        "agent": "searcher",
+        "instruction": "搜索如何使用Python编写命令行游戏（如贪吃蛇），重点查找处理终端输入、屏幕刷新和定时循环的库或方法，例如curses库的使用。",
+        "result": "🔍 GitHub搜索：使用 Python 编写命令行游戏 如贪吃蛇 重点 处理终端输入 屏幕刷新 定时循环 库或方法 例如 curses 使用 前序结果参考 t0 结果 目录结构\n\n⚠️ 仓库搜索失败（可能是API限流）"
+      },
+      {
+        "agent": "terminal",
+        "instruction": "根据搜索结果确认并安装任何必要的Python依赖（如如果需要特定的游戏开发库）。",
+        "result": "✅ 无需安装额外依赖（未找到具体命令），跳过。"
+      },
+      {
+        "agent": "coder",
+        "instruction": "编写一个完整的命令行版贪吃蛇游戏。代码必须使用Python，实现蛇的移动、食物生成、碰撞检测（墙壁和自身）、得分记录以及基本的游戏循环。请确保代码简洁，控制在100行以内。",
+        "result": "✅ 已保存：snake_game.py"
+      },
+      {
+        "agent": "tester",
+        "instruction": "运行编写的贪吃蛇游戏代码，验证其核心功能是否正常（移动、吃到食物、碰撞死亡等）。",
+        "result": "✅ 运行成功\n【测试信息】secret=82，输入序列：[50, 75, 88, 81, 84, 82]\n【输出】\n🐍 Snake Game Started! Press Ctrl+C to exit.\n\nEnter next direction (w/a/s/d): \fInvalid command. Keeping current direction.\n===================="
+      }
+    ],
+    "graph_json": {
+      "project": "clisnakegame",
+      "tasks": [
+        {
+          "id": "t0",
+          "agent": "viewer",
+          "instruction": "扫描工作区结构，了解当前环境。",
+          "depends": []
+        },
+        {
+          "id": "t1",
+          "agent": "searcher",
+          "instruction": "搜索如何使用Python编写命令行游戏（如贪吃蛇），重点查找处理终端输入、屏幕刷新和定时循环的库或方法，例如curses库的使用。",
+          "depends": [
+            "t0"
+          ]
+        },
+        {
+          "id": "t2",
+          "agent": "terminal",
+          "instruction": "根据搜索结果确认并安装任何必要的Python依赖（如如果需要特定的游戏开发库）。",
+          "depends": [
+            "t0"
+          ]
+        },
+        {
+          "id": "t3",
+          "agent": "coder",
+          "instruction": "编写一个完整的命令行版贪吃蛇游戏。代码必须使用Python，实现蛇的移动、食物生成、碰撞检测（墙壁和自身）、得分记录以及基本的游戏循环。请确保代码简洁，控制在100行以内。",
+          "depends": [
+            "t1",
+            "t2"
+          ]
+        },
+        {
+          "id": "t4",
+          "agent": "tester",
+          "instruction": "运行编写的贪吃蛇游戏代码，验证其核心功能是否正常（移动、吃到食物、碰撞死亡等）。",
+          "depends": [
+            "t3"
+          ]
+        }
+      ]
+    },
+    "success_count": 1,
+    "created_at": "2026-04-12 01:36:09",
+    "last_used": "2026-04-12 01:36:09"
   }
 }
