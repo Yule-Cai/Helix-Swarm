@@ -1,0 +1,6 @@
+任务：Build a Python web scraper that fetches the top 10 trending repositories from GitHub, displays them in a formatted table with name, stars, language, and description
+
+[Language requirement] All agent instructions, code comments, README, and outputs MUST be in English.
+## 经验教训总结
+
+**问题：** 测试步骤执行时找不到可执行的 `.py` 文件，原因是测试器在代码�

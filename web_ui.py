@@ -83,10 +83,15 @@ if not metrics_log.handlers:
 
 # ── 配置 ─────────────────────────────────────────────────────
 _DEFAULT_CONFIG = {
-    # ── LLM 连接配置（可在 /config 接口修改，无需改代码）──
+    # ── LLM 连接配置 ──────────────────────────────────────
+    "llm_provider":            "lmstudio",  # lmstudio | api
     "llm_api_url":             "http://localhost:1234/v1",
     "llm_model":               "local-model",
-    "llm_timeout":             300,
+    "llm_timeout":             600,
+    # ── 外部 API 配置（provider=api 时生效）──────────────
+    "api_key":                 "",           # 你的 API Key
+    "api_url":                 "https://api.anthropic.com/v1",
+    "api_model":               "claude-sonnet-4-20250514",
     # ── 功能开关 ──────────────────────────────────────────
     "search_enabled":          True,
     "search_source":           "github",
@@ -156,14 +161,27 @@ def _get_current_executor():
 
 # ── LLM 工厂 ─────────────────────────────────────────────────
 def _make_llm() -> LLMClient:
-    # 优先级：环境变量 > config.json > 默认值
-    timeout = int(os.environ.get("LLM_TIMEOUT",
-                  str(_cfg.get("llm_timeout", 300))))
-    return LLMClient(
-        api_url    = os.environ.get("LLM_API_URL",  _cfg.get("llm_api_url",   "http://localhost:1234/v1")),
-        model_name = os.environ.get("LLM_MODEL",    _cfg.get("llm_model",     "local-model")),
-        timeout    = timeout,
-    )
+    timeout  = int(os.environ.get("LLM_TIMEOUT", str(_cfg.get("llm_timeout", 600))))
+    provider = _cfg.get("llm_provider", "lmstudio")
+
+    if provider == "api":
+        # 外部 API 模式（OpenAI 兼容格式）
+        api_key   = os.environ.get("API_KEY",   _cfg.get("api_key",   ""))
+        api_url   = os.environ.get("API_URL",   _cfg.get("api_url",   "https://api.anthropic.com/v1"))
+        api_model = os.environ.get("API_MODEL", _cfg.get("api_model", "claude-sonnet-4-20250514"))
+        return LLMClient(
+            api_url    = api_url,
+            model_name = api_model,
+            api_key    = api_key if api_key else "not-needed",
+            timeout    = timeout,
+        )
+    else:
+        # LM Studio 本地模式（默认）
+        return LLMClient(
+            api_url    = os.environ.get("LLM_API_URL", _cfg.get("llm_api_url", "http://localhost:1234/v1")),
+            model_name = os.environ.get("LLM_MODEL",   _cfg.get("llm_model",   "local-model")),
+            timeout    = timeout,
+        )
 
 # ── LearningScheduler 懒加载 ──────────────────────────────────
 _scheduler: LearningScheduler | None = None

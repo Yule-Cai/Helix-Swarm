@@ -6,6 +6,9 @@
 <title>Multi-Agent OS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -79,6 +82,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .sdot.run{background:var(--green);animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 .slabel{font-size:11px;color:var(--text2);font-family:var(--mono)}
+/* ── Token 统计 ── */
+.token-row{display:flex;align-items:center;justify-content:space-between;padding:4px 8px;margin-top:4px;border-radius:var(--rxs);background:var(--bg2);cursor:pointer}
+.token-row:hover{background:var(--bg3)}
+.token-label{font-size:10px;color:var(--text3);font-family:var(--mono)}
+.token-value{font-size:11px;font-weight:600;color:var(--purple);font-family:var(--mono)}
+.token-breakdown{font-size:10px;color:var(--text3);font-family:var(--mono);padding:3px 8px 5px;line-height:1.6;display:none}
+.token-breakdown.show{display:block}
 
 /* ── Main ── */
 .main{flex:1;display:flex;flex-direction:column;min-width:0}
@@ -153,6 +163,26 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .av-o{background:var(--ad);color:var(--amber);border:1px solid var(--ab)}
 .av-s{background:var(--bd2);color:var(--blue);border:1px solid var(--bb)}
 .bubble{position:relative;max-width:70%;padding:9px 13px;border-radius:13px 13px 13px 3px;font-size:13.5px;line-height:1.65;background:var(--bg2);color:var(--text);border:1px solid var(--border)}
+/* ── Markdown 渲染 ── */
+.md-body{font-size:13.5px;line-height:1.7;color:var(--text)}
+.md-body h1,.md-body h2,.md-body h3{font-weight:600;margin:.8em 0 .4em;color:var(--text)}
+.md-body h1{font-size:1.2em}.md-body h2{font-size:1.1em}.md-body h3{font-size:1em}
+.md-body p{margin:.4em 0}
+.md-body ul,.md-body ol{padding-left:1.4em;margin:.4em 0}
+.md-body li{margin:.15em 0}
+.md-body code{font-family:var(--mono);font-size:12px;background:var(--bg3);padding:1px 5px;border-radius:4px}
+.md-body pre{background:var(--bg3);border-radius:var(--rxs);overflow-x:auto;margin:.6em 0;border:1px solid var(--border)}
+.md-body pre code{background:transparent;padding:0;font-size:12px}
+.md-body blockquote{border-left:3px solid var(--purple);padding-left:10px;color:var(--text2);margin:.4em 0}
+.md-body table{border-collapse:collapse;width:100%;margin:.6em 0;font-size:12px}
+.md-body th,.md-body td{border:1px solid var(--border);padding:5px 10px;text-align:left}
+.md-body th{background:var(--bg3);font-weight:600}
+.md-body a{color:var(--purple);text-decoration:none}.md-body a:hover{text-decoration:underline}
+.md-body hr{border:none;border-top:1px solid var(--border);margin:.8em 0}
+.bubble .md-body pre{background:rgba(0,0,0,.12)}
+/* code block copy btn */
+.pre-wrap{position:relative}.pre-wrap .copy-pre{position:absolute;top:6px;right:6px;padding:2px 7px;font-size:10px;border-radius:4px;border:1px solid var(--border2);background:var(--bg2);color:var(--text3);cursor:pointer;opacity:0;transition:opacity .15s}
+.pre-wrap:hover .copy-pre{opacity:1}
 .bubble.u{border-radius:13px 13px 3px 13px;background:var(--purple);color:#fff;border-color:transparent}
 .bubble:hover .cbtn,.agent-card:hover .cbtn{opacity:1}
 .cbtn{position:absolute;top:6px;right:6px;opacity:0;width:22px;height:22px;border-radius:4px;background:var(--bg);border:1px solid var(--border);color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .14s;z-index:1;box-shadow:var(--sh)}
@@ -259,6 +289,33 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 
 /* ── Select ── */
 .s-select{padding:5px 8px;border-radius:var(--rxs);border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:12px;cursor:pointer}
+
+/* ── Task Graph 面板 ── */
+.tg-panel{position:fixed;top:44px;right:0;width:280px;height:calc(100vh - 44px);background:var(--bg);border-left:1px solid var(--border);z-index:50;display:none;flex-direction:column;box-shadow:-4px 0 16px rgba(0,0,0,.08)}
+.tg-panel.show{display:flex}
+.tg-hd{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.tg-title{font-size:12px;font-weight:600;color:var(--text)}
+.tg-body{flex:1;overflow-y:auto;padding:10px}
+.tg-node{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--rxs);margin-bottom:4px;border:1px solid var(--border);background:var(--bg2);transition:all .2s}
+.tg-node.running{border-color:var(--purple);background:var(--pd);animation:tg-pulse .8s infinite alternate}
+.tg-node.done{border-color:var(--teal);background:var(--td);opacity:.7}
+.tg-node.failed{border-color:var(--coral);background:var(--cd)}
+.tg-node.skipped{opacity:.4}
+@keyframes tg-pulse{from{box-shadow:0 0 0 0 var(--pb)}to{box-shadow:0 0 0 4px transparent}}
+.tg-icon{width:16px;height:16px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px}
+.tg-node.pending .tg-icon{background:var(--border2)}
+.tg-node.running .tg-icon{background:var(--purple)}
+.tg-node.done    .tg-icon{background:var(--teal)}
+.tg-node.failed  .tg-icon{background:var(--coral)}
+.tg-node.skipped .tg-icon{background:var(--border3)}
+.tg-agent{font-size:11px;font-weight:600;color:var(--text);font-family:var(--mono)}
+.tg-instr{font-size:10px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+.tg-dep{font-size:9px;color:var(--text3);margin-left:auto;flex-shrink:0}
+.tg-empty{text-align:center;color:var(--text3);font-size:12px;padding:20px 0}
+/* ── Provider indicator in toolbar ── */
+.provider-badge{font-size:10px;font-family:var(--mono);padding:2px 6px;border-radius:10px;font-weight:600;flex-shrink:0}
+.provider-badge.lmstudio{background:var(--td);color:var(--teal)}
+.provider-badge.api{background:var(--pd);color:var(--purple)}
 </style>
 </head>
 <body>
@@ -306,6 +363,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
         <div class="sdot" id="sdot"></div>
         <span class="slabel" id="slabel">待机中</span>
       </div>
+      <div class="token-row" onclick="toggleTokenBreakdown()" title="点击展开详情" id="tokenRow" style="display:none">
+        <span class="token-label" id="tokenLabel">Tokens</span>
+        <span class="token-value" id="tokenValue">—</span>
+      </div>
+      <div class="token-breakdown" id="tokenBreakdown"></div>
     </div>
   </div>
 
@@ -313,12 +375,16 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
   <div class="main" id="mainArea">
     <div class="topbar">
       <span class="tb-title" id="tbTitle">Multi-Agent OS</span>
+      <span class="provider-badge lmstudio" id="providerBadge" onclick="openSettings()" title="点击切换 LLM 来源" style="cursor:pointer">LM Studio</span>
       <span class="tb-badge bp">Planner</span>
       <span class="tb-badge ba">Orchestrator</span>
       <span class="tb-badge bc">Coder</span>
       <span class="tb-badge bt">Tester</span>
       <button class="tb-btn" id="tbSearch" title="搜索 Ctrl+F" onclick="toggleSearch()">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="5" cy="5" r="3.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 8l2.5 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      </button>
+      <button class="tb-btn" id="tbGraph" title="任务图" onclick="toggleTaskGraph()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="2" cy="6" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="6" cy="2" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="10" cy="6" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="6" cy="10" r="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M3.4 5.3L4.7 3.4M7.3 3.4L8.6 5.3M8.6 6.7L7.3 8.6M4.7 8.6L3.4 6.7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
       </button>
       <button class="tb-btn" id="tbMap" title="消息地图" onclick="toggleMinimap()">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="1" width="4" height="10" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="7" y="1" width="4" height="4.5" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="7" y="7" width="4" height="4" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
@@ -500,13 +566,6 @@ function setRunning(v){
   sdot.className='sdot'+(v?' run':'');
   slabel.textContent=v ? t('running') : t('idle');
 }
-async function cancelTask(){
-  try{
-    const r = await fetch('/task/cancel',{method:'POST'});
-    const d = await r.json();
-    toast(d.msg || '取消信号已发送');
-  }catch(e){ toast('取消请求失败'); }
-}
 function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
 function onInpChange(el){resize(el);sendBtn.classList.toggle('ready',el.value.trim().length>0);sendBtn.disabled=running||!el.value.trim();}
 
@@ -562,28 +621,58 @@ function _removeImage(i){
   _renderImageBadges();
 }
 
+// 代码文件扩展名
+const _CODE_EXTS = new Set(['.py','.js','.ts','.html','.css','.json',
+  '.java','.cpp','.c','.cs','.go','.rs','.rb','.php','.sh','.bat',
+  '.yaml','.yml','.toml','.sql','.md','.txt']);
+
 async function handleFileUpload(files){
   if(!files||!files.length) return;
-  const results=[];
+  const codeFiles=[], imgFiles=[], otherFiles=[];
+
   for(const f of files){
-    const fd=new FormData();fd.append('file',f);
+    const ext = '.' + f.name.split('.').pop().toLowerCase();
+    const fd=new FormData(); fd.append('file',f);
     try{
       const r=await fetch('/upload',{method:'POST',body:fd});
       const d=await r.json();
       if(d.ok){
-        results.push(`✅ ${d.filename}`);
-        if(d.is_image){
-          _pendingImages.push(d.filename);
-        }
-      } else {
-        results.push(`❌ ${f.name}: ${d.error}`);
+        if(d.is_image)              imgFiles.push(d.filename);
+        else if(_CODE_EXTS.has(ext)) codeFiles.push(d.filename);
+        else                         otherFiles.push(d.filename);
       }
-    }catch(e){results.push(`❌ ${f.name}: 上传失败`);}
+    }catch(e){ toast(`❌ ${f.name} 上传失败`); }
   }
-  toast(`已上传 ${files.length} 个文件到 workspace`);
+
+  imgFiles.forEach(n => _pendingImages.push(n));
   _renderImageBadges();
-  if(document.getElementById('inputArea').style.display!=='none'){
-    _appendCard({role:'system',title:'文件上传完成',body:results.join('\n'),kind:'info'});
+
+  if(codeFiles.length > 0){
+    const flist = codeFiles.join(', ');
+    enterChatMode();
+    _appendCard({
+      role:'system',
+      title: _lang==='en' ? `📄 Code file(s) uploaded` : `📄 代码文件已上传`,
+      body: (_lang==='en'
+        ? `${flist}\n\nFile is ready in workspace. Describe what you want to do:\n• Fix bugs  • Add features  • Refactor  • Add comments`
+        : `${flist}\n\n文件已放入 workspace，描述你想对它做什么：\n• 修复 bug  • 添加功能  • 重构代码  • 添加注释`),
+      kind:'info'
+    });
+    const input = document.getElementById('inp');
+    if(input && !input.value.trim()){
+      const prefix = _lang==='en' ? `Please help me with ${flist}: ` : `请帮我修改 ${flist}：`;
+      input.value = prefix;
+      input.focus();
+      input.setSelectionRange(prefix.length, prefix.length);
+      onInpChange(input);
+    }
+  }
+
+  if((imgFiles.length + otherFiles.length) > 0 && codeFiles.length === 0){
+    const all = [...imgFiles,...otherFiles];
+    toast(all.length + (_lang==='en' ? ' file(s) uploaded to workspace' : ' 个文件已上传到 workspace'));
+    if(document.getElementById('inputArea').style.display!=='none')
+      _appendCard({role:'system',title:_lang==='en'?'Files uploaded':'文件已上传',body:all.join('\n'),kind:'info'});
   }
 }
 
@@ -761,13 +850,63 @@ function _appendUser(text,upd=true){
   d.innerHTML='<div class="av av-u">U</div>';d.appendChild(b);
   msgs.appendChild(d);if(upd)updateMinimap();scrollBot();
 }
-function _appendChat(text,upd=true){
-  const d=document.createElement('div');d.className='msg';
-  const b=document.createElement('div');b.className='bubble';
-  b.textContent=text;b.appendChild(mkCopy(text));
-  b.addEventListener('contextmenu',e=>showCtx(e,b,text));
-  d.innerHTML='<div class="av av-m">M</div>';d.appendChild(b);
-  msgs.appendChild(d);if(upd)updateMinimap();scrollBot();
+// ── Markdown 渲染工具 ──────────────────────────────────────
+function _renderMd(text) {
+  if (typeof marked === 'undefined') return `<p>${text.replace(/\n/g,'<br>')}</p>`;
+  // 配置 marked
+  marked.setOptions({
+    breaks: true,
+    gfm: true,
+  });
+  const html = marked.parse(text);
+  // 代码块加复制按钮
+  const wrapped = html.replace(/<pre><code([\s\S]*?)><([\s\S]*?)><\/code><\/pre>/g,
+    (m) => `<div class="pre-wrap">${m}<button class="copy-pre" onclick="copyPre(this)">Copy</button></div>`
+  );
+  return wrapped;
+}
+
+function copyPre(btn) {
+  const code = btn.parentElement.querySelector('code');
+  if (code) {
+    navigator.clipboard.writeText(code.textContent);
+    btn.textContent = '✓';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  }
+}
+
+function _appendChat(text, upd=true) {
+  const d = document.createElement('div'); d.className = 'msg';
+  const b = document.createElement('div'); b.className = 'bubble';
+
+  // 判断是否需要 markdown 渲染
+  const needsMd = /[#*`_\[\]>|]/.test(text) || text.includes('\n\n') || text.includes('```');
+  if (needsMd) {
+    const md = document.createElement('div');
+    md.className = 'md-body';
+    md.innerHTML = _renderMd(text);
+    // 代码高亮
+    if (typeof hljs !== 'undefined') {
+      md.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+    }
+    // 代码块加复制按钮
+    md.querySelectorAll('pre').forEach(pre => {
+      if (pre.parentElement.classList.contains('pre-wrap')) return;
+      const wrap = document.createElement('div'); wrap.className = 'pre-wrap';
+      pre.parentNode.insertBefore(wrap, pre); wrap.appendChild(pre);
+      const btn = document.createElement('button');
+      btn.className = 'copy-pre'; btn.textContent = 'Copy';
+      btn.onclick = () => copyPre(btn);
+      wrap.appendChild(btn);
+    });
+    b.appendChild(md);
+  } else {
+    b.textContent = text;
+  }
+  b.appendChild(mkCopy(text));
+  b.addEventListener('contextmenu', e => showCtx(e, b, text));
+  d.innerHTML = '<div class="av av-m">M</div>'; d.appendChild(b);
+  msgs.appendChild(d); if (upd) updateMinimap(); scrollBot();
 }
 function _appendTyping(){
   _removeTyping();
@@ -788,7 +927,22 @@ function _appendCard(data,upd=true){
     <svg class="carr" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 4l3 3 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </div>
   ${isRunning?'<div class="pbar"><div class="pbar-fill"></div></div>':''}
-  <div class="card-bd ${bc}">${esc(data.body)}</div>`;
+  <div class="card-bd ${bc}" id="cbd-${Date.now()}">${esc(data.body)}</div>`;
+  // 如果 body 含代码块，升级为 markdown 渲染
+  const cardBd = card.querySelector('.card-bd');
+  if (cardBd && data.body && (data.body.includes('```') || data.body.includes('\n#'))) {
+    cardBd.style.whiteSpace = 'normal';
+    const md = document.createElement('div'); md.className = 'md-body';
+    md.innerHTML = _renderMd(data.body);
+    if (typeof hljs !== 'undefined') md.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+    md.querySelectorAll('pre').forEach(pre => {
+      const wrap = document.createElement('div'); wrap.className = 'pre-wrap';
+      pre.parentNode.insertBefore(wrap, pre); wrap.appendChild(pre);
+      const btn = document.createElement('button'); btn.className = 'copy-pre'; btn.textContent = 'Copy';
+      btn.onclick = () => copyPre(btn); wrap.appendChild(btn);
+    });
+    cardBd.innerHTML = ''; cardBd.appendChild(md);
+  }
   card.appendChild(mkCopy(data.body));
   card.addEventListener('contextmenu',e=>showCtx(e,card,data.body));
   const d=document.createElement('div');d.className='msg';
@@ -870,7 +1024,13 @@ function updateMinimap(){
 // ══════════════════════════════════════
 //  Send
 // ══════════════════════════════════════
-async function newChat(){currentId=null;document.querySelectorAll('.ci').forEach(e=>e.classList.remove('active'));showWelcome();}
+async function newChat(){
+  currentId=null;
+  document.querySelectorAll('.ci').forEach(e=>e.classList.remove('active'));
+  _resetTokenDisplay();
+  _tgReset();
+  showWelcome();
+}
 
 async function sendMsg(){
   const text=inp.value.trim();if(!text||running)return;
@@ -904,12 +1064,21 @@ async function sendMsg(){
   _setCurrentEs(es);
   es.onmessage=e=>{
     const data=JSON.parse(e.data);
-    if(data.kind==='done'){_removeTyping();setRunning(false);es.close();_setCurrentEs(null);_saveCurrentChat();notify('任务完成 ✓','Multi-Agent OS 已完成你的请求');}
+    if(data.kind==='done'){_removeTyping();setRunning(false);es.close();_setCurrentEs(null);_saveCurrentChat();notify(t('task_done'),t('task_done_body'));}
     else if(data.error){_removeTyping();setRunning(false);es.close();_setCurrentEs(null);}
     else if(data.kind==='chat'){_removeTyping();_appendChat(data.body);setRunning(false);es.close();_setCurrentEs(null);_saveCurrentChat();}
-    else{_appendCard(data);_appendTyping();}
+    else{
+      // 解析完成消息里的 token 数据
+      if(data.kind==='finish' && data.body){
+        const tok = _parseTokenFromMessage(data.body);
+        if(tok) updateTokenDisplay(tok);
+      }
+      // 更新任务图
+      _tgHandleCard(data);
+      _appendCard(data);_appendTyping();
+    }
   };
-  es.onerror=()=>{_removeTyping();setRunning(false);es.close();_setCurrentEs(null);_appendCard({role:'system',title:'连接错误',body:'无法连接后端，请确认 web_ui.py 正在运行。',kind:'error'});};
+  es.onerror=()=>{_removeTyping();setRunning(false);es.close();_setCurrentEs(null);_appendCard({role:'system',title:t('conn_error'),body:t('conn_error_body'),kind:'error'});};
 }
 
 async function showWorkspace(){
@@ -1178,6 +1347,8 @@ async function _loadConfig() {
     }
     // 深色模式
     if (cfg.ui_dark_mode) applyDark(true);
+    // Provider badge
+    _updateProviderBadge(cfg.llm_provider || 'lmstudio');
     // 语言（必须在 Agent 模式开关之前）
     const lang = cfg.ui_language || 'zh';
     _lang = lang;
@@ -1196,8 +1367,162 @@ async function _loadConfig() {
 }
 
 // ══════════════════════════════════════
-//  深色模式
+//  TaskGraph 可视化
 // ══════════════════════════════════════
+let _tgVisible = false;
+let _tgNodes   = {};  // id -> {agent, instr, status, depends}
+
+function toggleTaskGraph() {
+  _tgVisible = !_tgVisible;
+  document.getElementById('tgPanel').classList.toggle('show', _tgVisible);
+  document.getElementById('tbGraph').classList.toggle('on', _tgVisible);
+}
+
+function _tgReset() {
+  _tgNodes = {};
+  _tgRender();
+}
+
+function _tgInitFromPlan(body) {
+  // 从 Planner 的任务摘要里解析节点
+  // 格式: ⏳ [t0] viewer: 扫描工作区...
+  _tgNodes = {};
+  const lines = body.split('\n');
+  for (const line of lines) {
+    const m = line.match(/\[(\w+)\]\s+(\w+):\s+(.+)/);
+    if (m) {
+      _tgNodes[m[1]] = {
+        id: m[1], agent: m[2],
+        instr: m[3].slice(0, 50),
+        status: 'pending', depends: []
+      };
+    }
+  }
+  _tgRender();
+}
+
+function _tgUpdateStatus(title, kind) {
+  // 从 agent card 的 title 解析节点状态
+  // title 格式: "▶ [t0] viewer" 或 "✅ [t0] viewer (1.2s)" 或 "❌ [t1] coder"
+  const m = title.match(/\[(\w+)\]/);
+  if (!m) return;
+  const id = m[1];
+  if (!_tgNodes[id]) {
+    // 不在已知节点里（重规划产生的新任务）
+    const am = title.match(/\]\s+(\w+)/);
+    if (am) _tgNodes[id] = {id, agent: am[1], instr: '', status: 'pending', depends: []};
+  }
+  if (!_tgNodes[id]) return;
+
+  if (title.startsWith('▶') || kind === 'running') {
+    _tgNodes[id].status = 'running';
+  } else if (title.startsWith('✅') || kind === 'result') {
+    _tgNodes[id].status = 'done';
+  } else if (title.startsWith('❌') || kind === 'error') {
+    _tgNodes[id].status = 'failed';
+  } else if (title.startsWith('⏭')) {
+    _tgNodes[id].status = 'skipped';
+  }
+  _tgRender();
+}
+
+function _tgRender() {
+  const body  = document.getElementById('tgBody');
+  const empty = document.getElementById('tgEmpty');
+  if (!body) return;
+
+  const nodes = Object.values(_tgNodes);
+  if (nodes.length === 0) {
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  const statusIcon = {
+    pending: '○', running: '▶', done: '✓', failed: '✗', skipped: '—'
+  };
+
+  body.innerHTML = nodes.map(n => `
+    <div class="tg-node ${n.status}">
+      <div class="tg-icon">${statusIcon[n.status] || '○'}</div>
+      <div style="flex:1;min-width:0">
+        <div class="tg-agent">${n.agent}</div>
+        <div class="tg-instr">${n.instr || '—'}</div>
+      </div>
+      <span class="tg-dep">${n.id}</span>
+    </div>
+  `).join('');
+}
+
+// 监听 SSE 消息更新任务图
+function _tgHandleCard(data) {
+  if (!data) return;
+  // Planner 任务图就绪
+  if (data.role === 'planner' && data.body && data.body.includes('[t')) {
+    _tgInitFromPlan(data.body);
+    // 自动打开任务图面板
+    if (!_tgVisible) toggleTaskGraph();
+  }
+  // Agent 执行状态更新
+  if (data.title) {
+    _tgUpdateStatus(data.title, data.kind);
+  }
+  // 任务完成后保持面板，但不自动关闭
+}
+let _tokenData = null;
+
+function updateTokenDisplay(data) {
+  // data: {calls, prompt, completion, total}
+  _tokenData = data;
+  const row  = document.getElementById('tokenRow');
+  const val  = document.getElementById('tokenValue');
+  const lbl  = document.getElementById('tokenLabel');
+  const bkd  = document.getElementById('tokenBreakdown');
+  if (!row || !data) return;
+  row.style.display = 'flex';
+  if (lbl) lbl.textContent = t('token_label');
+  if (val) val.textContent = data.total >= 1000
+    ? (data.total / 1000).toFixed(1) + 'k'
+    : data.total + ' tok';
+  if (bkd) bkd.innerHTML =
+    `${t('token_in')}：${data.prompt.toLocaleString()} · `+
+    `${t('token_out')}：${data.completion.toLocaleString()} · `+
+    `${t('token_calls').replace('$n', data.calls)}`;
+}
+
+function toggleTokenBreakdown() {
+  const bkd = document.getElementById('tokenBreakdown');
+  if (bkd) bkd.classList.toggle('show');
+}
+
+function _parseTokenFromMessage(body) {
+  // 从完成消息里提取 token 数据
+  const calls = body.match(/调用次数[：:]\s*(\d+)/)?.[1] ||
+                body.match(/calls[：:]\s*(\d+)/i)?.[1];
+  const prompt = body.match(/输入[：:]\s*([\d,]+)/)?.[1]?.replace(/,/g,'') ||
+                 body.match(/Input[：:]\s*([\d,]+)/i)?.[1]?.replace(/,/g,'');
+  const comp   = body.match(/输出[：:]\s*([\d,]+)/)?.[1]?.replace(/,/g,'') ||
+                 body.match(/Output[：:]\s*([\d,]+)/i)?.[1]?.replace(/,/g,'');
+  const total  = body.match(/合计[：:]\s*([\d,]+)/)?.[1]?.replace(/,/g,'') ||
+                 body.match(/Total[：:]\s*([\d,]+)/i)?.[1]?.replace(/,/g,'');
+  if (calls && total) {
+    return {
+      calls:      parseInt(calls),
+      prompt:     parseInt(prompt || 0),
+      completion: parseInt(comp   || 0),
+      total:      parseInt(total),
+    };
+  }
+  return null;
+}
+
+function _resetTokenDisplay() {
+  _tokenData = null;
+  const row = document.getElementById('tokenRow');
+  if (row) row.style.display = 'none';
+  const bkd = document.getElementById('tokenBreakdown');
+  if (bkd) bkd.classList.remove('show');
+}
 function applyDark(on) {
   document.body.classList.toggle('dark', on);
   // 同步保存
@@ -1235,20 +1560,34 @@ function _updateAgentModeLabel() {
 // ══════════════════════════════════════
 //  硬取消（立即断开 SSE，不等后端）
 // ══════════════════════════════════════
-let _currentEs = null;   // 当前 EventSource 引用
+//  硬取消（立即断开 SSE + 通知后端）
+// ══════════════════════════════════════
+let _currentEs = null;
 function _setCurrentEs(es) { _currentEs = es; }
 
 async function cancelTask() {
-  // 1. 立即断开 SSE 连接，停止前端接收
+  // 1. 立即断开 SSE，前端马上停止
   if (_currentEs) { _currentEs.close(); _currentEs = null; }
-  _removeTyping(); setRunning(false);
-  _appendCard({role:'system', title:'🛑 已取消', body:'任务已被用户终止。', kind:'info'});
-  // 2. 通知后端停止执行
+  _removeTyping();
+  setRunning(false);
+  _appendCard({role:'system', title:'🛑 ' + (_lang==='en'?'Cancelled':'已取消'),
+               body: _lang==='en'?'Task cancelled by user.':'任务已被用户终止。', kind:'info'});
+
+  // 2. 通知后端（加 3s 超时，避免后端无响应时卡住）
   try {
-    const r = await fetch('/task/cancel', {method:'POST'});
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 3000);
+    const r = await fetch('/task/cancel', {method:'POST', signal: ctrl.signal});
+    clearTimeout(timer);
     const d = await r.json();
-    toast(d.msg || '取消信号已发送');
-  } catch(e) { toast('取消请求失败'); }
+    if (d.ok) {
+      toast(_lang==='en' ? 'Task stopped' : '后端已停止');
+    }
+  } catch(e) {
+    // 超时或网络错误——前端已经停了，不影响用户
+    // 静默处理，不弹错误 toast
+    console.warn('[Cancel] backend signal failed:', e.message);
+  }
 }
 
 // ══════════════════════════════════════
@@ -1340,6 +1679,9 @@ const _i18n = {
     lp_learned: '已学 $n 个主题', lp_started: '开始于 $t',
     no_reports: '暂无报告<br>开启学习后自动生成',
     report_topics: '共学习 $n 个主题', report_detail_title: '学习报告详情',
+    token_label: 'Token 消耗', token_calls: '调用 $n 次',
+    tg_title: '任务图', tg_empty: '暂无任务',
+    token_in: '输入', token_out: '输出', token_total: '合计',
     welcome_title: '你今天想做什么？',
     welcome_sub: '描述开发需求或创作想法，系统自动规划并完成',
     welcome_placeholder: '发送消息，描述你的需求…',
@@ -1381,6 +1723,9 @@ const _i18n = {
     lp_learned: 'Learned $n topics', lp_started: 'Started at $t',
     no_reports: 'No reports yet<br>Reports are generated after learning runs',
     report_topics: '$n topics learned', report_detail_title: 'Learning Report',
+    token_label: 'Tokens Used', token_calls: '$n calls',
+    tg_title: 'Task Graph', tg_empty: 'No tasks yet',
+    token_in: 'Input', token_out: 'Output', token_total: 'Total',
     welcome_title: 'What would you like to do today?',
     welcome_sub: 'Describe your development needs or creative ideas — the system will plan and execute automatically',
     welcome_placeholder: 'Send a message, describe your request…',
@@ -1455,6 +1800,14 @@ function applyLanguage(lang) {
   if(stabs[0])            stabs[0].textContent            = t('tab_general');
   if(stabs[1])            stabs[1].textContent            = t('tab_agents');
 
+  // Token 显示
+  if(q('tokenLabel')) q('tokenLabel').textContent = t('token_label');
+  if(_tokenData) updateTokenDisplay(_tokenData);
+
+  // 任务图面板
+  if(q('tgTitle'))  q('tgTitle').textContent  = t('tg_title');
+  if(q('tgEmpty'))  q('tgEmpty').textContent  = t('tg_empty');
+
   // 报告详情弹层
   if(q('ldTitle'))        q('ldTitle').textContent        = t('report_detail_title');
 
@@ -1487,7 +1840,55 @@ async function renderSettingsTab(tab) {
     const cfg = await r.json();
     const isDark = document.body.classList.contains('dark');
     const lang = cfg.ui_language || 'zh';
+    const isApi = cfg.llm_provider === 'api';
     body.innerHTML = `
+      <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;padding:4px 0 8px">LLM 来源</div>
+      <div class="settings-row">
+        <div>
+          <label>LM Studio（本地）</label>
+          <small>使用本地运行的 LM Studio 模型</small>
+        </div>
+        <label class="tog">
+          <input type="radio" name="provider" value="lmstudio" ${!isApi?'checked':''} onchange="saveProvider('lmstudio')" style="display:none">
+          <span class="tog-sl" onclick="saveProvider('lmstudio')" style="${!isApi?'background:var(--purple)':''}"></span>
+        </label>
+      </div>
+      <div class="settings-row">
+        <div>
+          <label>外部 API</label>
+          <small>使用 Claude、OpenAI 等外部 API</small>
+        </div>
+        <label class="tog">
+          <input type="radio" name="provider" value="api" ${isApi?'checked':''} onchange="saveProvider('api')" style="display:none">
+          <span class="tog-sl" onclick="saveProvider('api')" style="${isApi?'background:var(--purple)':''}"></span>
+        </label>
+      </div>
+      <div id="apiCfgBlock" style="display:${isApi?'block':'none'};background:var(--bg2);border-radius:var(--rsm);padding:12px;margin:4px 0 8px;border:1px solid var(--border)">
+        <div style="margin-bottom:10px">
+          <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:4px">API URL</div>
+          <input id="apiUrlInp" value="${cfg.api_url||'https://api.anthropic.com/v1'}"
+            style="width:100%;padding:6px 8px;border-radius:var(--rxs);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:12px;font-family:var(--mono)"
+            onchange="saveCfg('api_url',this.value)" placeholder="https://api.anthropic.com/v1">
+        </div>
+        <div style="margin-bottom:10px">
+          <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:4px">模型名称</div>
+          <input id="apiModelInp" value="${cfg.api_model||'claude-sonnet-4-20250514'}"
+            style="width:100%;padding:6px 8px;border-radius:var(--rxs);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:12px;font-family:var(--mono)"
+            onchange="saveCfg('api_model',this.value)" placeholder="claude-sonnet-4-20250514">
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:4px">API Key</div>
+          <input id="apiKeyInp" type="password" value="${cfg.api_key||''}"
+            style="width:100%;padding:6px 8px;border-radius:var(--rxs);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:12px;font-family:var(--mono)"
+            onchange="saveCfg('api_key',this.value)" placeholder="sk-ant-... 或 sk-...">
+          <div style="font-size:10px;color:var(--text3);margin-top:3px">Key 保存在本地 config.json，不会上传</div>
+        </div>
+      </div>
+      <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;padding:12px 0 8px">LM Studio 配置</div>
+      <div class="settings-row" style="${isApi?'opacity:.4;pointer-events:none':''}">
+        <div><label>LM Studio URL</label><small>${cfg.llm_api_url||'http://localhost:1234/v1'}</small></div>
+      </div>
+      <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;padding:12px 0 8px">界面</div>
       <div class="settings-row">
         <div><label>${t('dark_mode')}</label><small>${t('dark_mode_desc')}</small></div>
         <label class="tog"><input type="checkbox" ${isDark?'checked':''} onchange="applyDark(this.checked)"><span class="tog-sl"></span></label>
@@ -1499,6 +1900,7 @@ async function renderSettingsTab(tab) {
           <option value="en" ${lang==='en'?'selected':''}>English</option>
         </select>
       </div>
+      <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;padding:12px 0 8px">功能</div>
       <div class="settings-row">
         <div><label>${t('skill_lib')}</label><small>${t('skill_lib_desc')}</small></div>
         <label class="tog"><input type="checkbox" ${cfg.skill_library_enabled?'checked':''} onchange="saveCfg('skill_library_enabled',this.checked)"><span class="tog-sl"></span></label>
@@ -1555,6 +1957,25 @@ async function saveCfg(key, value) {
     body: JSON.stringify({[key]: value})});
 }
 
+async function saveProvider(provider) {
+  await saveCfg('llm_provider', provider);
+  _updateProviderBadge(provider);
+  renderSettingsTab('general');
+  toast(provider === 'api' ? '已切换到外部 API 模式' : '已切换到 LM Studio 模式');
+}
+
+function _updateProviderBadge(provider) {
+  const badge = document.getElementById('providerBadge');
+  if (!badge) return;
+  if (provider === 'api') {
+    badge.textContent = 'API';
+    badge.className = 'provider-badge api';
+  } else {
+    badge.textContent = 'LM Studio';
+    badge.className = 'provider-badge lmstudio';
+  }
+}
+
 // ══════════════════════════════════════
 //  Init
 // ══════════════════════════════════════
@@ -1567,6 +1988,17 @@ async function saveCfg(key, value) {
   if (_autoLearnOn) _connectLogSSE();
 })();
 </script>
+
+<!-- ══ Task Graph 面板 ══ -->
+<div class="tg-panel" id="tgPanel">
+  <div class="tg-hd">
+    <span class="tg-title" id="tgTitle">任务图</span>
+    <button onclick="toggleTaskGraph()" style="width:22px;height:22px;border-radius:var(--rxs);border:1px solid var(--border);background:transparent;cursor:pointer;color:var(--text3);display:flex;align-items:center;justify-content:center">
+      <svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M1 1l7 7M8 1L1 8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="tg-body" id="tgBody"><div class="tg-empty" id="tgEmpty">暂无任务</div></div>
+</div>
 
 <!-- ══ 设置面板 ══ -->
 <div class="settings-overlay" id="settingsOverlay" onclick="if(event.target===this)closeSettings()">

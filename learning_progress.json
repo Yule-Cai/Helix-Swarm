@@ -1,6 +1,6 @@
 {
-  "idx": 73,
-  "total_learned": 70,
+  "idx": 86,
+  "total_learned": 82,
   "completed_topics": [
     {
       "topic": "python pygame game development",
@@ -281,7 +281,55 @@
     {
       "topic": "python flask rest api",
       "learned_at": "2026-04-12 10:08:33"
+    },
+    {
+      "topic": "python async asyncio",
+      "learned_at": "2026-04-13 22:12:38"
+    },
+    {
+      "topic": "python unittest pytest",
+      "learned_at": "2026-04-13 22:22:31"
+    },
+    {
+      "topic": "python design patterns",
+      "learned_at": "2026-04-13 22:28:18"
+    },
+    {
+      "topic": "python web scraping beautifulsoup",
+      "learned_at": "2026-04-13 22:34:00"
+    },
+    {
+      "topic": "python data structure algorithm",
+      "learned_at": "2026-04-13 22:39:51"
+    },
+    {
+      "topic": "python file operations pathlib",
+      "learned_at": "2026-04-13 22:45:37"
+    },
+    {
+      "topic": "python pygame game development",
+      "learned_at": "2026-04-13 22:51:24"
+    },
+    {
+      "topic": "python flask rest api",
+      "learned_at": "2026-04-13 22:57:12"
+    },
+    {
+      "topic": "python cli tool argparse",
+      "learned_at": "2026-04-13 23:02:45"
+    },
+    {
+      "topic": "python async asyncio",
+      "learned_at": "2026-04-13 23:08:56"
+    },
+    {
+      "topic": "python error handling best practices",
+      "learned_at": "2026-04-13 23:14:32"
+    },
+    {
+      "topic": "python unittest pytest",
+      "learned_at": "2026-04-13 23:19:55"
     }
   ],
-  "last_saved": "2026-04-12 10:16:57"
+  "last_saved": "2026-04-13 23:19:56"
 }
