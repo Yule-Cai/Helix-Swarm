@@ -81,13 +81,13 @@ class EnhancedMemory:
         )
         status = "成功" if success else "失败"
         prompt = (
-            f"任务：{task_desc}\n执行状态：{status}\n"
-            f"关键步骤：\n{history_text}\n\n"
-            f"请用2-3句话提炼本次任务的经验教训，重点是遇到了什么问题、如何解决的。"
+            f"Task: {task_desc}\nStatus: {status}\n"
+            f"Key steps:\n{history_text}\n\n"
+            f"In 2-3 sentences, summarize the key lessons from this task — what problems were encountered and how they were solved."
         )
         try:
             summary = self.llm.chat(
-                system="你是经验提炼专家，擅长从任务执行历史中提取可复用的知识。",
+                system="You are an experience distillation expert, skilled at extracting reusable knowledge from task execution history.",
                 user=prompt,
                 temperature=0.2,
                 max_tokens=200,

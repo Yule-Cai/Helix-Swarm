@@ -26,22 +26,22 @@ class DebuggerAgent:
         analysis = ""
         for max_tok in _TOKEN_LADDER:
             analysis = self.llm.chat(
-                "你是资深调试专家。\n"
-                "任务：\n"
-                "1. 用1-2句话说明报错根因。\n"
-                "2. 输出修复后的完整代码（必须），格式：\n"
-                "<file path=\"文件名\">\n修复后的完整代码\n</file>\n"
-                "不要省略任何代码，必须输出完整可运行的文件。",
+                "You are a senior debugging expert.\n"
+                "Tasks:\n"
+                "1. Explain the root cause in 1-2 sentences.\n"
+                "2. Output the complete fixed code (required), format:\n"
+                "<file path=\"filename\">\nfixed complete code\n</file>\n"
+                "Never omit any code — output a complete, runnable file.",
                 augmented,
                 temperature=0.2,
                 max_tokens=max_tok,
             )
             if analysis and analysis.strip():
                 break
-            print(f"⚠️  [Debugger] max_tokens={max_tok} 无响应，降级重试…")
+            print(f"⚠️  [Debugger] max_tokens={max_tok} no response, retrying…")
 
         if not analysis:
-            return "❌ 调试分析失败（LLM 无响应）"
+            return "❌ Debug analysis failed (LLM no response)"
 
         saved = self._write_fixed_files(analysis, workspace_dir)
 

@@ -24,9 +24,9 @@ class DocAgent:
         content = ""
         for max_tok in _TOKEN_LADDER:
             content = self.llm.chat(
-                "你是技术文档专家。根据提供的项目源码，生成一份完整的 README.md。\n"
-                "包含：项目简介、功能特性、安装依赖、运行方法（含示例）、注意事项。\n"
-                "语言：中文。格式：标准 Markdown。直接输出文档内容，不要额外解释。",
+                "You are a technical documentation expert. Based on the provided source code, generate a complete README.md.\n"
+                "Include: project overview, features, installation, usage with examples, and notes.\n"
+                "Language: English. Format: standard Markdown. Output the document directly, no extra explanations.",
                 augmented,
                 temperature=0.4,
                 max_tokens=max_tok,

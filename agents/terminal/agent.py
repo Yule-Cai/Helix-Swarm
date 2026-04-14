@@ -2,7 +2,7 @@
 TerminalAgent — 终端命令执行器
 修复：
   1. 用 LLM 从自然语言指令中提取真正的 shell 命令
-  2. pip install / python 命令自动替换为 sys.executable 路径（跨平台）
+  2. pip install 命令直接用 sys.executable -m pip 执行，绕过 Windows shell 路径问题
   3. 提取失败时跳过（返回 ✅），不触发重规划
   4. 防止 list index out of range 和 bad escape 错误
 """
@@ -11,10 +11,12 @@ import sys
 import os
 import re
 
+
 def _first_line(s: str) -> str:
     """安全取第一行，空字符串返回空字符串。"""
-    lines = (s or '').strip().splitlines()
-    return lines[0].strip() if lines else ''
+    lines = (s or "").strip().splitlines()
+    return lines[0].strip() if lines else ""
+
 
 class TerminalAgent:
     BLACKLIST = ["rm -rf /", "mkfs", "dd ", "sudo rm", "shutdown", "reboot", "format c:"]
@@ -31,29 +33,49 @@ class TerminalAgent:
             if blk in cmd:
                 return f"❌ 拒绝执行高危命令：{blk}"
 
-        # cd xxx && cmd 模式
-        m = re.search(r'cd\s+(\S+)\s*&&\s*(.*)', cmd)
-        if m:
-            workspace_dir = os.path.join(workspace_dir, m.group(1))
-            cmd = m.group(2).strip()
+        # pip install 单独处理：直接调 Python API，完全绕过 shell
+        pip_match = re.match(r'pip3?\s+install\s+(.+)', cmd.strip(), re.IGNORECASE)
+        if pip_match:
+            return self._pip_install(pip_match.group(1).strip())
 
-        # 先判断是否全局命令（必须在替换 pip→python 之前）
-        _global_cmds = {"pip", "pip3", "conda", "npm", "node", "git", "brew", "apt", "cargo"}
-        first_word = cmd.strip().split()[0].lower() if cmd.strip().split() else ''
-        is_global = first_word in _global_cmds
-        cwd = None if is_global else workspace_dir
-        if not is_global:
-            os.makedirs(workspace_dir, exist_ok=True)
+        # 其他命令走 subprocess
+        return self._run_shell(cmd, workspace_dir)
 
-        # 替换 python / pip 为绝对路径（用 lambda 避免替换字符串被当正则）
-        py  = sys.executable
-        pip = f'"{py}" -m pip'
-        cmd = re.sub(r'\bpip3?\b',    lambda m: pip,       cmd)
-        cmd = re.sub(r'\bpython3?\b', lambda m: f'"{py}"', cmd)
+    def _pip_install(self, packages: str) -> str:
+        """直接用 sys.executable -m pip 安装，避免 Windows 路径/编码问题。"""
+        pkg_list = packages.split()
+        print(f"🖥️  [Terminal] pip install {packages}")
+        try:
+            result = subprocess.run(
+                [sys.executable, "-m", "pip", "install"] + pkg_list,
+                capture_output=True, text=True,
+                encoding="utf-8", errors="replace",
+                timeout=120,
+            )
+            if result.returncode == 0:
+                return f"✅ 安装成功：{packages}\n{result.stdout[-500:].strip()}"
+            err = (result.stderr or result.stdout or "")[-500:]
+            return f"❌ 安装失败：{packages}\n{err}"
+        except subprocess.TimeoutExpired:
+            return f"❌ 安装超时（120s）：{packages}"
+        except Exception as e:
+            return f"❌ 安装异常：{e}"
+
+    def _run_shell(self, cmd: str, workspace_dir: str) -> str:
+        """执行非 pip 的 shell 命令。"""
+        # 判断是否全局命令（决定 cwd）
+        _global_cmds = {"python", "python3", "npm", "node", "git", "conda", "go"}
+        first = cmd.strip().split()[0].lower() if cmd.strip().split() else ""
+        cwd = None if first in _global_cmds else workspace_dir
+        if cwd:
+            os.makedirs(cwd, exist_ok=True)
+
+        # 替换 python 为绝对路径
+        py = sys.executable
+        cmd = re.sub(r"\bpython3?\b", lambda m: f'"{py}"', cmd)
 
         env = os.environ.copy()
         env["PYTHONIOENCODING"] = "utf-8"
-
         print(f"🖥️  [Terminal] 执行: {cmd}  (cwd={cwd})")
         try:
             r = subprocess.run(
@@ -62,8 +84,8 @@ class TerminalAgent:
                 encoding="utf-8", errors="replace",
             )
             if r.returncode == 0:
-                return f"✅ 执行成功\n{r.stdout[:1000]}"
-            return f"❌ 执行失败(退出码{r.returncode})\n{(r.stderr or r.stdout)[:500]}"
+                return f"✅ 执行成功\n{r.stdout[:800]}"
+            return f"❌ 执行失败(退出码{r.returncode})\n{(r.stderr or r.stdout)[:400]}"
         except subprocess.TimeoutExpired:
             return "❌ 超时（120s）"
         except Exception as e:
@@ -74,17 +96,17 @@ class TerminalAgent:
         text = instruction[:500]
 
         # ① 代码块优先
-        m = re.search(r'```(?:bash|shell|sh|cmd|powershell)?\s*\n?(.*?)```', text, re.DOTALL)
+        m = re.search(r"```(?:bash|shell|sh|cmd|powershell)?\s*\n?(.*?)```", text, re.DOTALL)
         if m:
             line = _first_line(m.group(1))
             if line:
                 return line
 
         # ② 逐行扫描：找第一个已知命令开头的行
-        known = {'pip', 'pip3', 'python', 'python3', 'npm', 'node',
-                 'git', 'conda', 'brew', 'apt', 'cargo', 'go'}
+        known = {"pip", "pip3", "python", "python3", "npm", "node",
+                 "git", "conda", "brew", "apt", "cargo", "go"}
         for line in text.splitlines():
-            line = line.strip().lstrip('$').strip()
+            line = line.strip().lstrip("$").strip()
             if not line:
                 continue
             parts = line.split()
@@ -92,27 +114,25 @@ class TerminalAgent:
                 continue
             if parts[0].lower() in known:
                 return line
-            # pip install 子串匹配（不用正则，避免 bad escape）
+            # pip install 子串匹配
             low = line.lower()
-            if 'pip install' in low or 'pip3 install' in low:
-                # 提取从 pip 开始的部分
-                idx = low.find('pip')
+            if "pip install" in low or "pip3 install" in low:
+                idx = low.find("pip")
                 return line[idx:].strip()
 
         # ③ LLM 提取
         if self.llm:
             try:
                 result = self.llm.chat(
-                    "你是命令提取器。从用户指令中提取需要执行的 shell 命令。\n"
-                    "只输出命令本身（如 pip install xxx），不要解释，不要加代码块标记。\n"
-                    "如果没有具体的包需要安装或没有明确命令，输出：NONE",
+                    "You are a command extractor. Extract the shell command to run from the user instruction.\n"
+                    "Output the command only (e.g. pip install flask), no explanations, no code block markers.\n"
+                    "If there is no specific package to install or no clear command, output: NONE",
                     instruction[:200],
                     temperature=0.0,
                     max_tokens=60,
                 )
-                line = _first_line(result)
-                line = line.strip('`').strip()
-                if line and line.upper() != 'NONE' and len(line) < 200:
+                line = _first_line(result).strip("`").strip()
+                if line and line.upper() != "NONE" and len(line) < 200:
                     parts = line.split()
                     if parts and parts[0].lower() in known:
                         return line

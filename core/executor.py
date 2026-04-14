@@ -68,9 +68,12 @@ class TaskExecutor:
     # ── 主执行入口 ────────────────────────────────────────────
     def execute(self, graph: TaskGraph, trace: TraceContext = None) -> bool:
         self._cancel_event.clear()
-        # 注入取消信号到 LLM client，让正在进行的 LLM 调用也能立即响应取消
+        # 注入取消信号到 LLM client
         if self.llm and hasattr(self.llm, 'set_cancel_event'):
             self.llm.set_cancel_event(self._cancel_event)
+        # 重置 token 计数
+        if self.llm and hasattr(self.llm, 'reset_usage'):
+            self.llm.reset_usage()
         root_trace  = trace or TraceContext()
         project_dir = os.path.join(self.workspace, graph.project)
         os.makedirs(project_dir, exist_ok=True)
@@ -181,8 +184,18 @@ class TaskExecutor:
         if graph.is_complete():
             bus.publish(EventType.TASK_GRAPH_DONE,
                         {"project": graph.project, "success": True}, trace=root_trace)
+            # Token 用量汇报
+            usage_msg = ""
+            if self.llm and hasattr(self.llm, "get_usage"):
+                u = self.llm.get_usage()
+                if u["total"] > 0:
+                    usage_msg = (f"\n\n📊 Token 用量\n"
+                                 f"调用次数：{u['calls']} 次\n"
+                                 f"输入：{u['prompt']:,} tokens\n"
+                                 f"输出：{u['completion']:,} tokens\n"
+                                 f"合计：{u['total']:,} tokens")
             self.push("system", "✅ 全部完成",
-                      f"项目 {graph.project} 所有任务执行完毕。", "finish")
+                      f"项目 {graph.project} 所有任务执行完毕。{usage_msg}", "finish")
             self._distill(graph, execution_history, success=True)
             # 更新 MEMORY.md
             self._update_project_memory(graph, execution_history, success=True)
@@ -224,6 +237,35 @@ class TaskExecutor:
             return False
 
         failure_reason = "\n".join(f"{t.agent}: {t.result[:200]}" for t in failed_tasks)
+
+        # ── 语法错误快速通道：executor 层直接处理，不等 LLM ──
+        _syntax_kws = ("语法错误", "SyntaxError", "invalid syntax", "syntax error")
+        if any(kw.lower() in failure_reason.lower() for kw in _syntax_kws):
+            import re as _re
+            fp = _re.search(r'([\w/\-.]+\.py)', failure_reason)
+            fpath = fp.group(1) if fp else "main.py"
+            new_tasks = [
+                Task(id="r0", agent="viewer",
+                     instruction=f"读取 {fpath} 的完整内容，显示所有代码行（带行号）",
+                     depends=[]),
+                Task(id="r1", agent="debugger",
+                     instruction=(f"修复 {fpath} 中的语法错误。\n\n"
+                                  f"错误：{failure_reason[:400]}\n\n"
+                                  f"请直接输出修复后的完整代码。"),
+                     depends=["r0"]),
+                Task(id="r2", agent="tester",
+                     instruction=f"运行 {fpath} 验证语法错误已修复。",
+                     depends=["r1"]),
+            ]
+            for t in graph.tasks:
+                if t.status == TaskStatus.FAILED:
+                    t.status = TaskStatus.SKIPPED
+            graph.tasks = [t for t in graph.tasks if t.status != TaskStatus.PENDING]
+            graph.tasks.extend(new_tasks)
+            self.push("system", "🔧 语法错误自动修复",
+                      f"检测到语法错误，启动自动修复流程：viewer → debugger → tester",
+                      "info")
+            return True
 
         self.push("system", "🔄 动态重规划",
                   f"检测到连续失败，正在重新规划后续步骤…\n失败原因：{failure_reason[:200]}",

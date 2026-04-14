@@ -79,9 +79,9 @@ class ProjectMemory:
         status = "成功" if success else "失败"
 
         prompt = (
-            f"目标：{goal}\n执行状态：{status}\n\n"
+            f"Goal: {goal}\nStatus: {status}\n\n"
             f"执行摘要：\n{history_text}\n\n"
-            f"当前项目记忆（已有条目）：\n"
+            f"Current project memory (existing entries):\n"
             + ("\n".join(f"- {e}" for e in existing) if existing else "（空）")
             + "\n\n"
             "任务：\n"
@@ -97,7 +97,7 @@ class ProjectMemory:
 
         try:
             result = self.llm.chat(
-                system="你是项目记忆整理专家。输出简洁、精确、可直接行动的知识条目。",
+                system="You are a project memory expert. Output concise, precise, directly actionable knowledge entries.",
                 user=prompt,
                 temperature=0.2,
                 max_tokens=600,

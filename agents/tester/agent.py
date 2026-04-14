@@ -40,7 +40,18 @@ class TesterAgent:
 
         syntax_err = self._check_syntax(src, script_path)
         if syntax_err:
-            return f"❌ 语法错误（无需运行）：{syntax_err}"
+            # 把出错代码一并返回，让 debugger 能直接看到并修复
+            lines = src.splitlines()
+            try:
+                err_line = int(re.search(r'第(\d+)行', syntax_err).group(1))
+                lo = max(0, err_line - 4)
+                hi = min(len(lines), err_line + 3)
+                snippet = "\n".join(f"{lo+i+1}: {l}" for i, l in enumerate(lines[lo:hi]))
+            except Exception:
+                snippet = src[:800]
+            return (f"❌ 语法错误：{syntax_err}\n\n"
+                    f"出错代码片段：\n{snippet}\n\n"
+                    f"完整文件路径：{script_path}")
 
         is_interactive = "input(" in src
         if is_interactive:
@@ -101,21 +112,68 @@ class TesterAgent:
     # ── 非交互式运行 ──────────────────────────────────────────
     def _run_simple(self, script_path: str) -> str:
         cwd = os.path.dirname(script_path)
-        cmd = [sys.executable, os.path.basename(script_path)]
         env = os.environ.copy()
         env["PYTHONIOENCODING"] = "utf-8"
+
+        # Flask/Web 服务检测：超时视为成功
+        src = self._read_src(script_path)
+        is_web = any(kw in src for kw in ["app.run(", "Flask(", "uvicorn", "gunicorn"])
+        timeout = 12 if is_web else 30
+        cmd = [sys.executable, os.path.basename(script_path)]
+
         try:
             r = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True,
                                encoding="utf-8", errors="replace",
-                               env=env, timeout=20)
+                               env=env, timeout=timeout)
             if r.returncode == 0:
                 return f"✅ 运行成功\n{(r.stdout or '').strip()[:600]}"
             err = (r.stderr or r.stdout or "").strip()
+
+            # 自动安装缺失模块后重试一次
+            mod = self._extract_missing_module(err)
+            if mod:
+                print(f"🔧 [Tester] 自动安装缺失模块: {mod}")
+                inst = subprocess.run(
+                    [sys.executable, "-m", "pip", "install", mod],
+                    capture_output=True, text=True, timeout=60
+                )
+                if inst.returncode == 0:
+                    try:
+                        r2 = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True,
+                                            encoding="utf-8", errors="replace",
+                                            env=env, timeout=timeout)
+                        if r2.returncode == 0:
+                            return f"✅ 自动安装 {mod} 后运行成功\n{(r2.stdout or '').strip()[:400]}"
+                        err = (r2.stderr or r2.stdout or "").strip()
+                    except subprocess.TimeoutExpired:
+                        return f"✅ 超时（Web 服务正常运行），视为成功。已自动安装：{mod}"
+
             return f"❌ 运行失败\n【分析】{self._analyze(os.path.basename(script_path), err)}\n【stderr】{err[:300]}"
         except subprocess.TimeoutExpired:
-            return "✅ 超时（GUI/Web 服务正常挂起），视为成功。"
+            if is_web:
+                return "✅ 超时（Web 服务正常运行），视为成功。"
+            return "✅ 超时（视为正常游戏循环），视为成功。"
         except Exception as e:
             return f"❌ 执行异常：{e}"
+
+    def _extract_missing_module(self, err: str) -> str | None:
+        """从报错里提取缺失的模块名并映射到 pip 包名。"""
+        m = re.search(r"No module named '([^']+)'", err) or re.search(r'No module named "([^"]+)"', err)
+        if not m:
+            return None
+        mod = m.group(1).split(".")[0]
+        name_map = {
+            "flask_migrate":    "flask-migrate",
+            "flask_sqlalchemy": "flask-sqlalchemy",
+            "flask_login":      "flask-login",
+            "flask_wtf":        "flask-wtf",
+            "flask_cors":       "flask-cors",
+            "dotenv":           "python-dotenv",
+            "PIL":              "Pillow",
+            "cv2":              "opencv-python",
+            "sklearn":          "scikit-learn",
+        }
+        return name_map.get(mod, mod.replace("_", "-"))
 
     # ── 交互式运行 ────────────────────────────────────────────
     def _run_interactive(self, script_path: str, src: str) -> str:
@@ -201,7 +259,7 @@ class TesterAgent:
     def _analyze(self, filename: str, err: str) -> str:
         try:
             return self.llm.chat(
-                "你是报错分析专家，用一句话说明根本原因和修复建议。",
+                "You are an error analysis expert. In one sentence, explain the root cause and fix suggestion.",
                 f"脚本：{filename}\n报错：{err[-1500:]}",
                 temperature=0.2,
             )

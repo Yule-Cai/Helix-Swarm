@@ -10,7 +10,7 @@ class SelfImproveAgent:
     def run(self, instruction: str, workspace_dir: str = "workspace") -> str:
         context = self._gather()
         analysis = self.llm.chat(
-            "你是Multi-Agent系统优化专家。分析执行数据，找出瓶颈，给出具体改进建议（按优先级列出）。",
+            "You are a Multi-Agent system optimization expert. Analyze execution data, identify bottlenecks, and provide specific improvement suggestions ranked by priority.",
             f"系统数据：\n{context}\n\n请求：{instruction}", temperature=0.3, max_tokens=800
         )
         self._log(instruction, analysis)

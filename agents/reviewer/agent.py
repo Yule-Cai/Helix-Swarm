@@ -33,13 +33,13 @@ class ReviewerAgent:
         review = ""
         for max_tok in _TOKEN_LADDER:
             review = self.llm.chat(
-                "你是资深代码审查专家。\n"
-                "任务：\n"
-                "1. 审查下方提供的所有源码文件。\n"
-                "2. 指出最多5条具体问题（需引用代码行）。\n"
-                "3. 输出改进后的完整代码，格式：\n"
-                "<file path=\"文件名\">\n改进后的完整代码\n</file>\n"
-                "4. 审查摘要放在代码块之前，简洁说明改了什么。",
+                "You are a senior code reviewer.\n"
+                "Tasks:\n"
+                "1. Review all source files provided below.\n"
+                "2. Identify up to 5 specific issues (reference line numbers).\n"
+                "3. Output the improved complete code, format:\n"
+                "<file path=\"filename\">\nimproved complete code\n</file>\n"
+                "4. Put a brief review summary before the code blocks.",
                 augmented,
                 temperature=0.3,
                 max_tokens=max_tok,
