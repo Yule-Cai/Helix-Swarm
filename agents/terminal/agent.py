@@ -5,17 +5,73 @@ TerminalAgent — 终端命令执行器
   2. pip install 命令直接用 sys.executable -m pip 执行，绕过 Windows shell 路径问题
   3. 提取失败时跳过（返回 ✅），不触发重规划
   4. 防止 list index out of range 和 bad escape 错误
+  5. [新增] 过滤 pip install 中的 Python 内置模块（sqlite3、json、os 等）
+     避免因 "pip install SQLite" 这类无效命令触发无限重规划
 """
 import subprocess
 import sys
 import os
 import re
 
+DESCRIPTION    = "Execute shell commands: pip install, compile, run scripts, system operations"
+DESCRIPTION_ZH = "执行 Shell 命令：pip 安装、编译、运行脚本等系统操作"
+
+# ── 永远不需要 pip 安装的包（Python 内置 / 标准库）────────────
+# Planner 偶尔会生成 "pip install Flask SQLite" 这类命令，
+# SQLite 是内置模块，安装会报错并触发无限重规划。
+# 这里统一过滤，只安装真正的第三方包。
+_STDLIB_PACKAGES = {
+    # 数据库
+    "sqlite3", "sqlite",
+    # 常用内置
+    "json", "os", "sys", "re", "math", "pathlib", "threading",
+    "queue", "datetime", "collections", "itertools", "functools",
+    "typing", "abc", "io", "hashlib", "uuid", "random", "time",
+    "csv", "xml", "html", "urllib", "http", "logging", "unittest",
+    "string", "copy", "pprint", "struct", "array", "enum", "dataclasses",
+    "contextlib", "weakref", "gc", "inspect", "importlib", "pkgutil",
+    "traceback", "warnings", "signal", "socket", "ssl", "select",
+    "asyncio", "concurrent", "multiprocessing", "subprocess",
+    "tempfile", "shutil", "glob", "fnmatch", "stat", "platform",
+    "argparse", "getopt", "configparser", "tomllib",
+    "base64", "binascii", "codecs", "unicodedata",
+    "decimal", "fractions", "statistics", "cmath",
+    "calendar", "locale", "gettext",
+    "textwrap", "difflib", "readline",
+    "pickle", "shelve", "dbm", "zlib", "gzip", "bz2", "lzma",
+    "zipfile", "tarfile",
+    "email", "smtplib", "poplib", "imaplib", "ftplib",
+    "xmlrpc", "ipaddress",
+    "tkinter", "curses",
+    "ctypes", "cffi",
+    "token", "tokenize", "ast", "dis", "py_compile", "compileall",
+    "cProfile", "profile", "timeit", "trace", "resource",
+    "atexit", "builtins",
+}
+
 
 def _first_line(s: str) -> str:
     """安全取第一行，空字符串返回空字符串。"""
     lines = (s or "").strip().splitlines()
     return lines[0].strip() if lines else ""
+
+
+def _filter_pip_packages(packages_str: str) -> str:
+    """
+    从 pip install 的包列表中移除内置模块名。
+    例：'Flask SQLite requests' → 'Flask requests'
+    返回清理后的包列表字符串，若全是内置模块则返回空字符串。
+    """
+    parts   = packages_str.split()
+    cleaned = []
+    for p in parts:
+        # 去掉版本号再判断，如 "SQLite==3.0" → "sqlite"
+        name = re.split(r"[>=<!@]", p)[0].strip().lower()
+        if name in _STDLIB_PACKAGES:
+            print(f"⚠️  [Terminal] 跳过内置模块（无需安装）：{p}")
+        else:
+            cleaned.append(p)
+    return " ".join(cleaned)
 
 
 class TerminalAgent:
@@ -33,10 +89,18 @@ class TerminalAgent:
             if blk in cmd:
                 return f"❌ 拒绝执行高危命令：{blk}"
 
-        # pip install 单独处理：直接调 Python API，完全绕过 shell
+        # pip install 单独处理
         pip_match = re.match(r'pip3?\s+install\s+(.+)', cmd.strip(), re.IGNORECASE)
         if pip_match:
-            return self._pip_install(pip_match.group(1).strip())
+            raw_pkgs     = pip_match.group(1).strip()
+            filtered_pkgs = _filter_pip_packages(raw_pkgs)
+
+            # 过滤后为空 → 全是内置模块，直接跳过
+            if not filtered_pkgs:
+                return (f"✅ 跳过安装：{raw_pkgs} 均为 Python 内置模块，无需 pip 安装。")
+
+            # 有真正的第三方包才安装
+            return self._pip_install(filtered_pkgs)
 
         # 其他命令走 subprocess
         return self._run_shell(cmd, workspace_dir)
@@ -63,15 +127,13 @@ class TerminalAgent:
 
     def _run_shell(self, cmd: str, workspace_dir: str) -> str:
         """执行非 pip 的 shell 命令。"""
-        # 判断是否全局命令（决定 cwd）
         _global_cmds = {"python", "python3", "npm", "node", "git", "conda", "go"}
         first = cmd.strip().split()[0].lower() if cmd.strip().split() else ""
-        cwd = None if first in _global_cmds else workspace_dir
+        cwd   = None if first in _global_cmds else workspace_dir
         if cwd:
             os.makedirs(cwd, exist_ok=True)
 
-        # 替换 python 为绝对路径
-        py = sys.executable
+        py  = sys.executable
         cmd = re.sub(r"\bpython3?\b", lambda m: f'"{py}"', cmd)
 
         env = os.environ.copy()
@@ -114,7 +176,6 @@ class TerminalAgent:
                 continue
             if parts[0].lower() in known:
                 return line
-            # pip install 子串匹配
             low = line.lower()
             if "pip install" in low or "pip3 install" in low:
                 idx = low.find("pip")

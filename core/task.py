@@ -64,28 +64,35 @@ class TaskPlanner:
     Fixed output format — no longer natural language plans.
     """
 
-    # Description of all available agents (for Planner reference)
-    AGENT_REGISTRY = {
-        # ── Core Agents ──
-        "viewer":       "Scan and view workspace directory structure",
-        "cleaner":      "Clean up leftover files or directories",
-        "searcher":     "GitHub搜索：API文档、报错解决方案、代码参考",
-        "terminal":     "Execute terminal commands (pip install, compile, etc.)",
-        "coder":        "Write or modify code files",
-        "tester":       "Run code to verify functionality, analyze errors",
-        "debugger":     "Deep error analysis, output fix plan",
-        "reviewer":     "Review code quality, add comments",
-        "doc":          "Generate README.md documentation",
-        "writer":       "Write novel/story prose",
-        "skill":        "Query skill library, recommend existing skill templates",
-        "browser":      "Fetch and extract web page content",
-        "selfimprove":  "Analyze system weak points, output improvement suggestions",
-        # ── v1 新增 Agent ──
-        "statemanager": "Story tracker: read chapter content, update character state table (JSON)",
-        "visualizer":   "Architecture artist: convert logic to Mermaid flowcharts or diagrams (.png)",
-        "mcp":          "MCP universal agent: connect any standard MCP Server via MCP protocol",
-        "plugin":       "Plugin agent: wrap third-party GitHub projects or scripts as callable capabilities",
-    }
+    # ── 动态 Agent 注册表 ──────────────────────────────────────
+    # 不再硬编码！由 AgentRegistry 自动扫描 agents/ 目录生成。
+    # 通过 set_registry() 注入，或在 __init__ 时传入。
+    # 兼容旧代码：若未注入 registry，自动尝试初始化。
+    _registry = None  # AgentRegistry 实例（类变量，共享）
+
+    @classmethod
+    def set_registry(cls, registry):
+        """注入 AgentRegistry 实例（在 web_ui.py 启动时调用一次）。"""
+        cls._registry = registry
+
+    @classmethod
+    def _get_agents_desc(cls) -> str:
+        """
+        获取当前可用 Agent 的描述字符串。
+        优先用 AgentRegistry，回退到空字符串（Planner 会用自己的判断）。
+        """
+        if cls._registry is not None:
+            return cls._registry.format_for_planner()
+        # 懒加载：第一次调用时自动初始化 registry
+        try:
+            from core.agent_registry import AgentRegistry
+            cls._registry = AgentRegistry()
+            print(f"⚡ [Planner] 自动发现 {len(cls._registry.available_names())} 个 Agent："
+                  f" {', '.join(cls._registry.available_names())}")
+            return cls._registry.format_for_planner()
+        except Exception as e:
+            print(f"⚠️  [Planner] AgentRegistry 初始化失败，使用空列表: {e}")
+            return ""
 
     SYSTEM_PROMPT = """You are a task planning expert. Break down user requests into a directed acyclic task graph.
 
@@ -104,7 +111,7 @@ Rules:
 9. to wrap third-party GitHub projects as callable capabilities: use plugin
 10. if user mentions images/screenshots/UI mockups: include the image path in the instruction so coder can reference it
 11. [IMPORTANT] for games and complex programs, the coder instruction MUST explicitly say "keep code concise, under 150 lines" to avoid LLM timeout
-12. [IMPORTANT] only use terminal when a third-party package clearly needs installing (e.g. pip install pygame). Flask, SQLite, json, os and other stdlib/commonly-installed packages do NOT need terminal — just use them in coder directly
+12. [CRITICAL] NEVER use terminal to install: sqlite3, SQLite, json, os, sys, re, math, pathlib, threading, queue, datetime, collections, itertools, functools, typing, abc, io, hashlib, uuid, random, time, csv, xml, html, urllib, http, email, logging, unittest — these are Python stdlib, already built-in. Flask is usually pre-installed; only add terminal if coder explicitly fails with ModuleNotFoundError. When in doubt, skip terminal and go straight to coder.
 13. [IMPORTANT] for Flask/Web projects, coder MUST generate all required HTML template files (saved to templates/) alongside app.py — omitting templates causes TemplateNotFound errors at runtime
 
 [Parallel planning example] when search + install + code are needed:
@@ -181,7 +188,7 @@ Output JSON only, no explanations:
         """
         memory: MemPalaceManager instance (optional), for structured memory injection.
         """
-        agents_desc = "\n".join(f"- {k}: {v}" for k, v in self.AGENT_REGISTRY.items())
+        agents_desc = self._get_agents_desc()
 
         # Inject structured memory context
         memory_hint = ""
@@ -256,7 +263,7 @@ Output JSON only, no explanations:
                      depends=["r0"]),
             ]
 
-        agents_desc = "\n".join(f"- {k}: {v}" for k, v in self.AGENT_REGISTRY.items())
+        agents_desc = self._get_agents_desc()
 
         memory_hint = ""
         if memory:
