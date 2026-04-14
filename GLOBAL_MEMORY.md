@@ -3,3 +3,8 @@
 - Flask REST API 推荐使用 Flask-RESTful 或 Marshmallow，简化数据序列化
 - BeautifulSoup + requests 是抓取动态网页的可靠组合，优先处理 HTML 结构
 - argparse 支持自定义 CLI 参数，配合 help 文本可快速构建用户友好工具
+- 用 asyncio + async/await 替代 threading 处理 I/O 密集型任务，提升并发效率
+- pytest fixture + parametrize 高效复用测试数据，减少重复代码
+- Flask REST API 推荐搭配 Flask-RESTful 或 Marshmallow 简化数据序列化
+- BeautifulSoup + requests 是抓取动态网页的可靠组合，优先处理 HTML 结构
+- argparse 支持自定义 CLI 参数，配合 help 文本快速构建用户友好工具

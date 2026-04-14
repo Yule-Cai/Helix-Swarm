@@ -1,6 +1,6 @@
 {
-  "idx": 86,
-  "total_learned": 82,
+  "idx": 139,
+  "total_learned": 126,
   "completed_topics": [
     {
       "topic": "python pygame game development",
@@ -329,7 +329,183 @@
     {
       "topic": "python unittest pytest",
       "learned_at": "2026-04-13 23:19:55"
+    },
+    {
+      "topic": "python design patterns",
+      "learned_at": "2026-04-14 13:15:16"
+    },
+    {
+      "topic": "python web scraping beautifulsoup",
+      "learned_at": "2026-04-14 13:21:48"
+    },
+    {
+      "topic": "python data structure algorithm",
+      "learned_at": "2026-04-14 13:28:15"
+    },
+    {
+      "topic": "python file operations pathlib",
+      "learned_at": "2026-04-14 13:34:48"
+    },
+    {
+      "topic": "python pygame game development",
+      "learned_at": "2026-04-14 13:41:12"
+    },
+    {
+      "topic": "python flask rest api",
+      "learned_at": "2026-04-14 13:47:44"
+    },
+    {
+      "topic": "python cli tool argparse",
+      "learned_at": "2026-04-14 13:53:54"
+    },
+    {
+      "topic": "python async asyncio",
+      "learned_at": "2026-04-14 14:00:44"
+    },
+    {
+      "topic": "python unittest pytest",
+      "learned_at": "2026-04-14 14:11:49"
+    },
+    {
+      "topic": "python design patterns",
+      "learned_at": "2026-04-14 14:17:42"
+    },
+    {
+      "topic": "python web scraping beautifulsoup",
+      "learned_at": "2026-04-14 14:23:06"
+    },
+    {
+      "topic": "python data structure algorithm",
+      "learned_at": "2026-04-14 14:29:42"
+    },
+    {
+      "topic": "python file operations pathlib",
+      "learned_at": "2026-04-14 14:35:20"
+    },
+    {
+      "topic": "python cli tool argparse",
+      "learned_at": "2026-04-14 14:49:03"
+    },
+    {
+      "topic": "python async asyncio",
+      "learned_at": "2026-04-14 14:55:54"
+    },
+    {
+      "topic": "python unittest pytest",
+      "learned_at": "2026-04-14 15:05:22"
+    },
+    {
+      "topic": "python web scraping beautifulsoup",
+      "learned_at": "2026-04-14 15:15:14"
+    },
+    {
+      "topic": "python data structure algorithm",
+      "learned_at": "2026-04-14 15:21:33"
+    },
+    {
+      "topic": "python file operations pathlib",
+      "learned_at": "2026-04-14 15:28:04"
+    },
+    {
+      "topic": "python pygame game development",
+      "learned_at": "2026-04-14 15:33:49"
+    },
+    {
+      "topic": "python flask rest api",
+      "learned_at": "2026-04-14 15:39:22"
+    },
+    {
+      "topic": "python cli tool argparse",
+      "learned_at": "2026-04-14 15:45:15"
+    },
+    {
+      "topic": "python async asyncio",
+      "learned_at": "2026-04-14 15:52:31"
+    },
+    {
+      "topic": "python unittest pytest",
+      "learned_at": "2026-04-14 16:03:31"
+    },
+    {
+      "topic": "python design patterns",
+      "learned_at": "2026-04-14 16:10:19"
+    },
+    {
+      "topic": "python web scraping beautifulsoup",
+      "learned_at": "2026-04-14 16:17:04"
+    },
+    {
+      "topic": "python data structure algorithm",
+      "learned_at": "2026-04-14 16:22:48"
+    },
+    {
+      "topic": "python file operations pathlib",
+      "learned_at": "2026-04-14 16:28:49"
+    },
+    {
+      "topic": "python pygame game development",
+      "learned_at": "2026-04-14 16:34:34"
+    },
+    {
+      "topic": "python flask rest api",
+      "learned_at": "2026-04-14 16:40:29"
+    },
+    {
+      "topic": "python cli tool argparse",
+      "learned_at": "2026-04-14 16:46:30"
+    },
+    {
+      "topic": "python async asyncio",
+      "learned_at": "2026-04-14 16:53:42"
+    },
+    {
+      "topic": "python error handling best practices",
+      "learned_at": "2026-04-14 17:00:21"
+    },
+    {
+      "topic": "python unittest pytest",
+      "learned_at": "2026-04-14 17:07:19"
+    },
+    {
+      "topic": "python web scraping beautifulsoup",
+      "learned_at": "2026-04-14 17:17:05"
+    },
+    {
+      "topic": "python data structure algorithm",
+      "learned_at": "2026-04-14 17:22:54"
+    },
+    {
+      "topic": "python file operations pathlib",
+      "learned_at": "2026-04-14 17:29:10"
+    },
+    {
+      "topic": "python pygame game development",
+      "learned_at": "2026-04-14 17:35:00"
+    },
+    {
+      "topic": "python flask rest api",
+      "learned_at": "2026-04-14 17:41:04"
+    },
+    {
+      "topic": "python cli tool argparse",
+      "learned_at": "2026-04-14 17:47:24"
+    },
+    {
+      "topic": "python async asyncio",
+      "learned_at": "2026-04-14 17:55:09"
+    },
+    {
+      "topic": "python design patterns",
+      "learned_at": "2026-04-14 20:49:59"
+    },
+    {
+      "topic": "python web scraping beautifulsoup",
+      "learned_at": "2026-04-14 21:01:33"
+    },
+    {
+      "topic": "python data structure algorithm",
+      "learned_at": "2026-04-14 21:13:41"
     }
   ],
-  "last_saved": "2026-04-13 23:19:56"
+  "last_saved": "2026-04-14 21:13:42"
 }

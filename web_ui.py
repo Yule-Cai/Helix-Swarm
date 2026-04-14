@@ -29,26 +29,8 @@ from core.memory          import MemPalaceManager
 from core.memory_enhanced import EnhancedMemory
 from core.project_memory  import ProjectMemory, GlobalMemoryIndex
 
-# ── v2 Agent 集 ───────────────────────────────────────────────
-from agents.coder.agent       import CoderAgent
-from agents.tester.agent      import TesterAgent
-from agents.viewer.agent      import ViewerAgent
-from agents.cleaner.agent     import CleanerAgent
-from agents.debugger.agent    import DebuggerAgent
-from agents.searcher.agent    import SearcherAgent
-from agents.terminal.agent    import TerminalAgent
-from agents.reviewer.agent    import ReviewerAgent
-from agents.doc.agent         import DocAgent
-from agents.writer.agent      import WriterAgent
-from agents.skill.agent       import SkillAgent
-from agents.browser.agent     import BrowserAgent
-from agents.selfimprove.agent import SelfImproveAgent
-
-# ── v1 独有 Agent ─────────────────────────────────────────────
-from agents.statemanager.agent import StateManager
-from agents.visualizer.agent   import VisualizerAgent
-from agents.mcp.agent          import MCPUniversalAgent
-from agents.plugin.agent       import GitHubSkillAgent
+# ── Agent 自动发现（替代 17 行手动 import）────────────────────
+from core.agent_registry import AgentRegistry
 
 # ── v2 学习调度器 ─────────────────────────────────────────────
 from core.learning_scheduler import LearningScheduler
@@ -64,7 +46,6 @@ MAX_QUEUE     = 200
 MAX_ITER      = 25
 THREAD_POOL   = ThreadPoolExecutor(max_workers=10)
 
-# 支持视觉的图片扩展名
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".gif", ".webp"}
 
 os.makedirs(WORKSPACE_DIR, exist_ok=True)
@@ -83,16 +64,13 @@ if not metrics_log.handlers:
 
 # ── 配置 ─────────────────────────────────────────────────────
 _DEFAULT_CONFIG = {
-    # ── LLM 连接配置 ──────────────────────────────────────
-    "llm_provider":            "lmstudio",  # lmstudio | api
+    "llm_provider":            "lmstudio",
     "llm_api_url":             "http://localhost:1234/v1",
     "llm_model":               "local-model",
     "llm_timeout":             600,
-    # ── 外部 API 配置（provider=api 时生效）──────────────
-    "api_key":                 "",           # 你的 API Key
+    "api_key":                 "",
     "api_url":                 "https://api.anthropic.com/v1",
     "api_model":               "claude-sonnet-4-20250514",
-    # ── 功能开关 ──────────────────────────────────────────
     "search_enabled":          True,
     "search_source":           "github",
     "max_iterations":          25,
@@ -104,11 +82,10 @@ _DEFAULT_CONFIG = {
     "self_improve_enabled":    True,
     "self_improve_modify":     False,
     "auto_discover_agents":    True,
-    # ── UI 偏好 ───────────────────────────────────────────
-    "ui_language":             "zh",    # zh / en
+    "ui_language":             "zh",
     "ui_dark_mode":            False,
-    "agent_mode_default":      True,    # True=Agent模式, False=普通聊天
-    "disabled_agents":         [],      # 被用户关闭的 Agent 列表
+    "agent_mode_default":      True,
+    "disabled_agents":         [],
     "learning_topics": [
         "python pygame game development",
         "python flask rest api",
@@ -146,8 +123,19 @@ _cfg = load_config()
 _skill_library  = SkillLibrary()
 _global_memory  = MemPalaceManager("global")
 
+# ── AgentRegistry 初始化（启动时自动扫描 agents/ 目录）────────
+_registry = AgentRegistry(
+    disabled=_cfg.get("disabled_agents", []),
+    lang=_cfg.get("ui_language", "zh"),
+)
+# 注入给 TaskPlanner，让 Planner 按当前语言看到所有 Agent
+TaskPlanner.set_registry(_registry)
+
+print(f"🤖 已发现 {len(_registry.available_names())} 个 Agent："
+      f" {', '.join(_registry.available_names())}")
+
 # ── 当前执行中的 executor（用于取消）────────────────────────
-_current_executor     = None
+_current_executor      = None
 _current_executor_lock = __import__("threading").Lock()
 
 def _set_current_executor(ex):
@@ -165,7 +153,6 @@ def _make_llm() -> LLMClient:
     provider = _cfg.get("llm_provider", "lmstudio")
 
     if provider == "api":
-        # 外部 API 模式（OpenAI 兼容格式）
         api_key   = os.environ.get("API_KEY",   _cfg.get("api_key",   ""))
         api_url   = os.environ.get("API_URL",   _cfg.get("api_url",   "https://api.anthropic.com/v1"))
         api_model = os.environ.get("API_MODEL", _cfg.get("api_model", "claude-sonnet-4-20250514"))
@@ -176,7 +163,6 @@ def _make_llm() -> LLMClient:
             timeout    = timeout,
         )
     else:
-        # LM Studio 本地模式（默认）
         return LLMClient(
             api_url    = os.environ.get("LLM_API_URL", _cfg.get("llm_api_url", "http://localhost:1234/v1")),
             model_name = os.environ.get("LLM_MODEL",   _cfg.get("llm_model",   "local-model")),
@@ -192,7 +178,7 @@ def _get_scheduler() -> LearningScheduler:
         try:
             llm    = _make_llm()
             mem    = MemPalaceManager("global_knowledge")
-            search = SearcherAgent(llm)
+            search = _registry.build_one("searcher", llm)
             class _MemAdapter:
                 def __init__(self, m): self.m = m
                 def store_memory(self, content, summary): self.m.store_memory(content, summary)
@@ -220,31 +206,14 @@ def save_history(data):
 def sse(data: dict) -> str:
     return f"data: {json.dumps(data, ensure_ascii=False)}\n\n"
 
-# ── Agent 工厂（所有 v1 + v2 Agent 合并）────────────────────
+# ── Agent 工厂（由 AgentRegistry 动态实例化）─────────────────
 def build_agents(llm: LLMClient) -> dict:
-    all_agents = {
-        "viewer":       ViewerAgent(),
-        "cleaner":      CleanerAgent(),
-        "coder":        CoderAgent(llm),
-        "tester":       TesterAgent(llm),
-        "debugger":     DebuggerAgent(llm),
-        "terminal":     TerminalAgent(llm),
-        "reviewer":     ReviewerAgent(llm),
-        "doc":          DocAgent(llm),
-        "writer":       WriterAgent(llm),
-        "skill":        SkillAgent(llm),
-        "browser":      BrowserAgent(llm),
-        "selfimprove":  SelfImproveAgent(llm,
-                            allow_modify=_cfg.get("self_improve_modify", False)),
-        "statemanager": StateManager(llm),
-        "visualizer":   VisualizerAgent(llm),
-        "plugin":       GitHubSkillAgent(llm),
-    }
-    # searcher 始终加入（search_enabled 只控制自主学习，不影响 Agent 任务执行）
-    all_agents["searcher"] = SearcherAgent(llm)
-    # 过滤掉用户禁用的 Agent
-    disabled = set(_cfg.get("disabled_agents", []))
-    return {k: v for k, v in all_agents.items() if k not in disabled}
+    # 同步最新的 disabled_agents 和语言设置
+    _registry.set_disabled(_cfg.get("disabled_agents", []))
+    _registry.set_lang(_cfg.get("ui_language", "zh"))
+    # 重新注入给 Planner（语言或可用 Agent 可能已变化）
+    TaskPlanner.set_registry(_registry)
+    return _registry.build_all(llm)
 
 # ── 主页 ─────────────────────────────────────────────────────
 @app.route("/")
@@ -256,11 +225,10 @@ def index():
 def run():
     user_input = request.args.get("q", "").strip()
     chat_id    = request.args.get("cid", "").strip()
-    force_chat = request.args.get("mode", "") == "chat"   # Agent模式关闭时前端传 mode=chat
+    force_chat = request.args.get("mode", "") == "chat"
     if not user_input:
         return Response(sse({"error": "empty"}), mimetype="text/event-stream")
 
-    # 解析前端传来的图片文件名列表（逗号分隔），转为 workspace 内的绝对路径
     imgs_param   = request.args.get("imgs", "").strip()
     image_paths: list[str] = []
     if imgs_param:
@@ -282,7 +250,6 @@ def run():
             collected.append(item)
             msg_q.put(item)
 
-        # 为本次请求创建根链路追踪
         root_trace = TraceContext()
         bus.publish(EventType.SYSTEM_START, {
             "user_input": user_input[:100],
@@ -294,7 +261,6 @@ def run():
             router = Router(llm)
             route  = router.route(user_input, has_images=bool(image_paths))
 
-            # mode=chat 时强制走 CHAT 路径（用户关闭了 Agent 模式）
             if force_chat:
                 from core.router import RouteResult
                 route = RouteResult(Intent.CHAT, payload=user_input)
@@ -331,8 +297,7 @@ def run():
                 return
 
             # ── DEV 路径 ─────────────────────────────────────
-            # 1. 技能库召回
-            skill_hint = ""
+            skill_hint    = ""
             matched_skill = None
             if _cfg.get("skill_library_enabled", True):
                 matched_skill = _skill_library.find_relevant_skill(user_input)
@@ -355,17 +320,13 @@ def run():
                          + ("  ⚡ 直接复用任务图（跳过规划）" if can_reuse else ""),
                          "info")
 
-            # 2. 记忆召回（ChromaDB 向量 + JSON 双后端）
-            mem_ctx = _global_memory.recall(user_input)
-
-            # 3. 初始化增强记忆（项目级）
+            mem_ctx     = _global_memory.recall(user_input)
             enhanced_mem = None
+            project_mem  = None
 
-            # 4. 规划任务图
             planner = TaskPlanner(llm)
             ui_lang = _cfg.get("ui_language", "zh")
 
-            # 技能库高置信度命中时直接复用任务图，跳过 Planner LLM 调用
             if matched_skill and _skill_library.can_reuse_graph(matched_skill):
                 emit("planner", "⚡ Planner · 跳过规划", "技能库高置信度命中，直接复用历史任务图…", "info")
                 graph = planner.rebuild_from_skill(user_input, matched_skill)
@@ -390,23 +351,15 @@ def run():
                  f"项目：{graph.project}\n共 {len(graph.tasks)} 个任务\n\n{graph.summary()}",
                  "result")
 
-            # 5. 初始化项目级增强记忆 + MEMORY.md
-            enhanced_mem  = None
-            project_mem   = None
             if _cfg.get("enhanced_memory_enabled", True):
                 enhanced_mem = EnhancedMemory(project_name=graph.project, llm_client=llm)
-            # ProjectMemory 始终初始化（不依赖 enhanced_memory_enabled）
             project_mem = ProjectMemory(graph.project, llm_client=llm)
 
-            # 把全局记忆注入 Planner（补充 search_structured 的覆盖面）
             global_mem_ctx = GlobalMemoryIndex().load()
             if global_mem_ctx and not mem_ctx:
                 graph.skill_hint = (graph.skill_hint + "\n\n" + global_mem_ctx).strip()
 
-            # 6. 构建所有 Agent
-            agents = build_agents(llm)
-
-            # 7. 执行任务图
+            agents   = build_agents(llm)
             executor = TaskExecutor(agents, msg_q, WORKSPACE_DIR,
                                     enhanced_memory=enhanced_mem,
                                     planner=planner,
@@ -414,10 +367,9 @@ def run():
                                     project_memory=project_mem,
                                     llm=llm)
             _set_current_executor(executor)
-            success  = executor.execute(graph, trace=root_trace)
+            success = executor.execute(graph, trace=root_trace)
             _set_current_executor(None)
 
-            # 8. 封装技能
             if success and _cfg.get("skill_library_enabled", True):
                 try:
                     steps = [{"agent": t.agent, "instruction": t.instruction,
@@ -426,17 +378,14 @@ def run():
                     _skill_library.create_skill(
                         user_input, steps,
                         graph.tasks[-1].result if graph.tasks else "", llm,
-                        task_graph=graph,   # ← 存储完整任务图
+                        task_graph=graph,
                     )
-                    bus.publish(EventType.SKILL_CREATED, {
-                        "project": graph.project,
-                    }, trace=root_trace)
+                    bus.publish(EventType.SKILL_CREATED, {"project": graph.project}, trace=root_trace)
                     emit("system", "✨ 技能已封装",
                          "本次任务已存入技能库，下次类似需求可直接复用。", "info")
                 except Exception as e:
                     print(f"⚠️  技能封装失败: {e}")
 
-            # 9. 存入全局记忆（经验蒸馏已由 executor 异步处理，无需重复）
             if _cfg.get("enhanced_memory_enabled", True):
                 try:
                     summary = f"{'成功' if success else '失败'}：{user_input[:60]}"
@@ -528,6 +477,10 @@ def manage_config():
         if k in body:
             _cfg[k] = body[k]
     save_config(_cfg)
+    # 配置变更后同步 Registry 的语言和禁用列表
+    _registry.set_lang(_cfg.get("ui_language", "zh"))
+    _registry.set_disabled(_cfg.get("disabled_agents", []))
+    TaskPlanner.set_registry(_registry)
     return jsonify(_cfg)
 
 # ── 文件上传 ──────────────────────────────────────────────────
@@ -540,7 +493,7 @@ def upload_file():
         return jsonify({"error": "文件名为空"}), 400
     safe_name = secure_filename(f.filename)
     f.save(os.path.join(WORKSPACE_DIR, safe_name))
-    ext = os.path.splitext(safe_name)[1].lower()
+    ext      = os.path.splitext(safe_name)[1].lower()
     is_image = ext in IMAGE_EXTS
     return jsonify({"ok": True, "filename": safe_name, "is_image": is_image})
 
@@ -574,13 +527,13 @@ def list_skills():
 def delete_skill(skill_id):
     return jsonify({"ok": _skill_library.delete_skill(skill_id)})
 
-# ── 错误解决方案库（v1 特色接口）────────────────────────────
+# ── 错误解决方案库 ────────────────────────────────────────────
 @app.route("/error-solutions")
 def error_solutions():
     mem = EnhancedMemory("_tmp")
     return jsonify(mem.list_error_solutions())
 
-# ── 自我改进日志（v1 特色接口）───────────────────────────────
+# ── 自我改进日志 ──────────────────────────────────────────────
 @app.route("/improve-logs")
 def improve_logs():
     log_file = os.path.join(BASE_DIR, "improvement_log.json")
@@ -595,7 +548,6 @@ def improve_logs():
 # ── EventBus 接口 ─────────────────────────────────────────────
 @app.route("/events/stream")
 def events_stream():
-    """SSE：订阅所有事件（实时链路监控）"""
     prefix = request.args.get("prefix", "")
     sub    = bus.subscribe_queue(prefix=prefix, queue_size=500)
 
@@ -618,7 +570,6 @@ def events_stream():
 
 @app.route("/events/history")
 def events_history():
-    """查询事件历史"""
     prefix = request.args.get("prefix", "")
     limit  = int(request.args.get("limit", 100))
     events = bus.get_history(prefix=prefix, limit=limit)
@@ -626,7 +577,6 @@ def events_history():
 
 @app.route("/events/trace/<trace_id>")
 def event_trace(trace_id):
-    """查询一条链路的完整事件序列"""
     events = bus.get_trace(trace_id)
     return jsonify([e.to_dict() for e in events])
 
@@ -647,7 +597,6 @@ def learning_stop():
 
 @app.route("/task/cancel", methods=["POST"])
 def task_cancel():
-    """取消当前正在执行的任务图。"""
     ex = _get_current_executor()
     if ex:
         ex.cancel()
@@ -656,7 +605,6 @@ def task_cancel():
 
 @app.route("/learning/reset", methods=["POST"])
 def learning_reset():
-    """清空学习进度，下次启动从第一个主题重新开始。"""
     s = _get_scheduler()
     return jsonify(s.reset_progress() if s else {"ok": False, "msg": "调度器未初始化"})
 
@@ -680,7 +628,6 @@ def learning_report_detail(filename):
 
 @app.route("/learning/logs")
 def learning_logs_sse():
-    """SSE：实时推送学习日志"""
     s = _get_scheduler()
     if not s:
         return Response(sse({"error": "调度器未初始化"}), mimetype="text/event-stream")
@@ -710,42 +657,21 @@ def learning_logs_recent():
     s = _get_scheduler()
     return jsonify(s.get_recent_logs(50) if s else [])
 
-# ── Agent 注册表接口 ──────────────────────────────────────────
-# 英文描述
-_AGENT_DESC_EN = {
-    "viewer":       "Scan workspace directory structure",
-    "cleaner":      "Clean up residual files or directories",
-    "searcher":     "GitHub search: API docs, error solutions, code references",
-    "terminal":     "Execute terminal commands (pip install, compile, etc.)",
-    "coder":        "Write or modify code files",
-    "tester":       "Run code to verify functionality, analyze errors",
-    "debugger":     "Deep error analysis, output fix plan",
-    "reviewer":     "Review code quality, add comments",
-    "doc":          "Generate README.md documentation",
-    "writer":       "Write novel/story content",
-    "skill":        "Query skill library, recommend existing templates",
-    "browser":      "Fetch web page content",
-    "selfimprove":  "Analyze system weaknesses, output improvement suggestions",
-    "statemanager": "Novel scene recorder: extract character states to JSON",
-    "visualizer":   "Generate Mermaid flowcharts or architecture diagrams",
-    "mcp":          "MCP universal agent: connect to any MCP Server",
-    "plugin":       "Plugin agent: wrap third-party GitHub projects as capabilities",
-}
-
+# ── Agent 注册表接口（由 AgentRegistry 驱动）──────────────────
 @app.route("/agents")
 def list_agents():
-    """返回所有已注册 Agent 及其说明"""
-    from core.task import TaskPlanner
-    registry = TaskPlanner.AGENT_REGISTRY
+    """返回所有已发现的 Agent 及其双语描述和启用状态。"""
     disabled = set(_cfg.get("disabled_agents", []))
     lang     = _cfg.get("ui_language", "zh")
-    return jsonify({
-        name: {
-            "desc":    _AGENT_DESC_EN.get(name, desc) if lang == "en" else desc,
+    result   = {}
+    for name in _registry._entries:
+        result[name] = {
+            "desc":    _registry.get_description(name, lang),
+            "desc_en": _registry.get_description(name, "en"),
+            "desc_zh": _registry.get_description(name, "zh"),
             "enabled": name not in disabled,
         }
-        for name, desc in registry.items()
-    })
+    return jsonify(result)
 
 @app.route("/agents/toggle", methods=["POST"])
 def toggle_agent():
@@ -762,6 +688,7 @@ def toggle_agent():
         disabled.append(name)
     _cfg["disabled_agents"] = disabled
     save_config(_cfg)
+    _registry.set_disabled(disabled)
     return jsonify({"ok": True, "name": name, "enabled": enabled})
 
 # ── 系统状态 ──────────────────────────────────────────────────
@@ -770,18 +697,20 @@ def system_status():
     import platform
     handler = SystemHandler(_skill_library, "workspace")
     return jsonify({
-        "version":     "merged-v1v2",
-        "python":      platform.python_version(),
-        "skills":      len(_skill_library.list_skills()),
-        "agents":      17,
-        "event_bus":   "running",
+        "version":        "merged-v1v2",
+        "python":         platform.python_version(),
+        "skills":         len(_skill_library.list_skills()),
+        "agents":         len(_registry.available_names()),
+        "agent_names":    _registry.available_names(),
+        "event_bus":      "running",
         "memory_backend": "chromadb+json",
-        "platform":    platform.system(),
+        "platform":       platform.system(),
     })
 
 # ── 启动 ─────────────────────────────────────────────────────
 if __name__ == "__main__":
     print("🌐 Multi-Agent OS 融合版启动…")
-    print("📦 架构: v2 TaskGraph | Agent: 17个 | 记忆: ChromaDB+JSON | EventBus: 已启动")
+    print(f"📦 架构: v2 TaskGraph | Agent: {len(_registry.available_names())}个 | "
+          f"记忆: ChromaDB+JSON | EventBus: 已启动")
     print("📌 http://127.0.0.1:5000")
     app.run(debug=True, use_reloader=False, threaded=True, port=5000)

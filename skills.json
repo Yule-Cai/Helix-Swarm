@@ -311,5 +311,323 @@
     "success_count": 1,
     "created_at": "2026-04-13 22:01:21",
     "last_used": "2026-04-13 22:01:21"
+  },
+  "skill_1776164503": {
+    "id": "skill_1776164503",
+    "name": "",
+    "description": "帮我做一个我的世界游戏",
+    "keywords": [],
+    "steps": [
+      {
+        "agent": "viewer",
+        "instruction": "Scan workspace structure",
+        "result": "📁 目录结构：\n(空)"
+      },
+      {
+        "agent": "coder",
+        "instruction": "Create a Minecraft-style voxel game using HTML/JavaScript with Three.js (runs in browser without installation). Keep code under 150 lines. Features: 3D block world, first-person controls (WASD + mouse), click to place/remove blocks, different block types. Save as index.html with inline JavaScript.",
+        "result": "✅ 已保存：index.html"
+      },
+      {
+        "agent": "tester",
+        "instruction": "Verify the game runs correctly by checking the HTML file structure and syntax",
+        "result": "⏭️ 未找到可执行的 .py 文件，跳过测试。"
+      }
+    ],
+    "graph_json": {
+      "project": "minecraftminigame",
+      "tasks": [
+        {
+          "id": "t0",
+          "agent": "viewer",
+          "instruction": "Scan workspace structure",
+          "depends": []
+        },
+        {
+          "id": "t1",
+          "agent": "coder",
+          "instruction": "Create a Minecraft-style voxel game using HTML/JavaScript with Three.js (runs in browser without installation). Keep code under 150 lines. Features: 3D block world, first-person controls (WASD + mouse), click to place/remove blocks, different block types. Save as index.html with inline JavaScript.",
+          "depends": [
+            "t0"
+          ]
+        },
+        {
+          "id": "t2",
+          "agent": "tester",
+          "instruction": "Verify the game runs correctly by checking the HTML file structure and syntax",
+          "depends": [
+            "t1"
+          ]
+        }
+      ]
+    },
+    "success_count": 1,
+    "created_at": "2026-04-14 19:01:53",
+    "last_used": "2026-04-14 19:01:53"
+  },
+  "skill_1776164634": {
+    "id": "skill_1776164634",
+    "name": "",
+    "description": "用python做一个我的世界游戏",
+    "keywords": [],
+    "steps": [
+      {
+        "agent": "viewer",
+        "instruction": "Scan workspace structure",
+        "result": "📁 目录结构：\n(空)"
+      },
+      {
+        "agent": "searcher",
+        "instruction": "Search for Python Ursina Minecraft voxel game tutorial or example code",
+        "result": "🔍 GitHub搜索：Search Python Ursina Minecraft voxel game tutorial or\n\n⚠️ 搜索无结果：关键词 'Search Python Ursina Minecraft voxel game tutorial or' 未找到相关仓库"
+      },
+      {
+        "agent": "terminal",
+        "instruction": "pip install ursina",
+        "result": "✅ 安装成功：ursina\nsina) (0.8.1)\nRequirement already satisfied: sswg==4.3.0 in C:\\Users\\caiyule\\AppData\\Roaming\\Python\\Python313\\site-packages (from ursina) (4.3.0)\nRequirement already satisfied: panda3d-s"
+      },
+      {
+        "agent": "coder",
+        "instruction": "Based on search results, write a Minecraft-style voxel game using Ursina. Include: player movement (WASD), jumping, looking around (mouse), placing blocks (left click), removing blocks (right click), block selection (1-4 keys), terrain generation. Keep code under 150 lines.",
+        "result": "✅ 已保存：game.py"
+      },
+      {
+        "agent": "tester",
+        "instruction": "Run the main.py file to verify the game launches without errors",
+        "result": "✅ 超时（视为正常游戏循环），视为成功。"
+      }
+    ],
+    "graph_json": {
+      "project": "minecraftpython",
+      "tasks": [
+        {
+          "id": "t0",
+          "agent": "viewer",
+          "instruction": "Scan workspace structure",
+          "depends": []
+        },
+        {
+          "id": "t1",
+          "agent": "searcher",
+          "instruction": "Search for Python Ursina Minecraft voxel game tutorial or example code",
+          "depends": [
+            "t0"
+          ]
+        },
+        {
+          "id": "t2",
+          "agent": "terminal",
+          "instruction": "pip install ursina",
+          "depends": [
+            "t0"
+          ]
+        },
+        {
+          "id": "t3",
+          "agent": "coder",
+          "instruction": "Based on search results, write a Minecraft-style voxel game using Ursina. Include: player movement (WASD), jumping, looking around (mouse), placing blocks (left click), removing blocks (right click), block selection (1-4 keys), terrain generation. Keep code under 150 lines.",
+          "depends": [
+            "t1",
+            "t2"
+          ]
+        },
+        {
+          "id": "t4",
+          "agent": "tester",
+          "instruction": "Run the main.py file to verify the game launches without errors",
+          "depends": [
+            "t3"
+          ]
+        }
+      ]
+    },
+    "success_count": 1,
+    "created_at": "2026-04-14 19:04:06",
+    "last_used": "2026-04-14 19:04:06"
+  },
+  "skill_1776165481": {
+    "id": "skill_1776165481",
+    "name": "GameLongTermMaintenance",
+    "description": "我想做一个能长期维护的游戏",
+    "keywords": [
+      "viewer",
+      "plugin",
+      "searcher",
+      "skill"
+    ],
+    "steps": [
+      {
+        "agent": "viewer",
+        "instruction": "Scan workspace structure",
+        "result": "📁 目录结构：\n(空)"
+      },
+      {
+        "agent": "skill",
+        "instruction": "Query skill library for 'long-term game' templates",
+        "result": "📭 技能库无匹配，任务完成后将自动封装。"
+      },
+      {
+        "agent": "plugin",
+        "instruction": "Wrap GitHub project 'terraria-game-template' as callable Agent",
+        "result": "❌ 外部技能执行报错: python: can't open file 'C:\\\\Multi-Agent-OS-merged\\\\maos\\\\workspace\\\\awesome_github_tool\\\\main.py': [Errno 2] No such file or directory\n"
+      },
+      {
+        "agent": "viewer",
+        "instruction": "Scan workspace structure to locate missing or corrupted GitHub plugin files",
+        "result": "📁 目录结构：\n(空)"
+      },
+      {
+        "agent": "searcher",
+        "instruction": "Search GitHub for 'Terraria game template' or 'long-term game project template' with Python support",
+        "result": "🔍 GitHub搜索：Search GitHub Terraria game template or long-term game\n\n⚠️ 搜索无结果：关键词 'Search GitHub Terraria game template or long-term game' 未找到相关仓库"
+      },
+      {
+        "agent": "plugin",
+        "instruction": "Wrap the first GitHub project found in searcher results as a callable plugin, ensuring correct file paths and dependencies",
+        "result": "❌ 外部技能执行报错: python: can't open file 'C:\\\\Multi-Agent-OS-merged\\\\maos\\\\workspace\\\\awesome_github_tool\\\\main.py': [Errno 2] No such file or directory\n"
+      },
+      {
+        "agent": "viewer",
+        "instruction": "Scan workspace structure to locate missing or corrupted GitHub plugin files",
+        "result": "📁 目录结构：\n(空)"
+      },
+      {
+        "agent": "searcher",
+        "instruction": "Search GitHub for 'long-term game template' or 'modular game engine' to find reusable code patterns",
+        "result": "🔍 GitHub搜索：Search GitHub long-term game template or modular game\n\n⚠️ 搜索无结果：关键词 'Search GitHub long-term game template or modular game' 未找到相关仓库"
+      },
+      {
+        "agent": "coder",
+        "instruction": "Create a minimal modular game engine structure with core classes: Game, Player, Level, and SaveSystem — keep code concise, under 150 lines",
+        "result": "✅ 已保存：savegame.js"
+      },
+      {
+        "agent": "tester",
+        "instruction": "Run the game engine to verify basic initialization and save/load functionality",
+        "result": "⏭️ 未找到可执行的 .py 文件，跳过测试。"
+      }
+    ],
+    "graph_json": {
+      "project": "long_term_game",
+      "tasks": [
+        {
+          "id": "t0",
+          "agent": "viewer",
+          "instruction": "Scan workspace structure",
+          "depends": []
+        },
+        {
+          "id": "t1",
+          "agent": "skill",
+          "instruction": "Query skill library for 'long-term game' templates",
+          "depends": [
+            "t0"
+          ]
+        },
+        {
+          "id": "t2",
+          "agent": "plugin",
+          "instruction": "Wrap GitHub project 'terraria-game-template' as callable Agent",
+          "depends": [
+            "t0"
+          ]
+        },
+        {
+          "id": "r0",
+          "agent": "viewer",
+          "instruction": "Scan workspace structure to locate missing or corrupted GitHub plugin files",
+          "depends": []
+        },
+        {
+          "id": "r1",
+          "agent": "searcher",
+          "instruction": "Search GitHub for 'Terraria game template' or 'long-term game project template' with Python support",
+          "depends": [
+            "r0"
+          ]
+        },
+        {
+          "id": "r2",
+          "agent": "plugin",
+          "instruction": "Wrap the first GitHub project found in searcher results as a callable plugin, ensuring correct file paths and dependencies",
+          "depends": [
+            "r1"
+          ]
+        },
+        {
+          "id": "r0",
+          "agent": "viewer",
+          "instruction": "Scan workspace structure to locate missing or corrupted GitHub plugin files",
+          "depends": []
+        },
+        {
+          "id": "r1",
+          "agent": "searcher",
+          "instruction": "Search GitHub for 'long-term game template' or 'modular game engine' to find reusable code patterns",
+          "depends": [
+            "r0"
+          ]
+        },
+        {
+          "id": "r2",
+          "agent": "coder",
+          "instruction": "Create a minimal modular game engine structure with core classes: Game, Player, Level, and SaveSystem — keep code concise, under 150 lines",
+          "depends": [
+            "r1"
+          ]
+        },
+        {
+          "id": "r3",
+          "agent": "tester",
+          "instruction": "Run the game engine to verify basic initialization and save/load functionality",
+          "depends": [
+            "r2"
+          ]
+        },
+        {
+          "id": "r4",
+          "agent": "debugger",
+          "instruction": "Analyze test failure if any — fix core engine logic to ensure persistence and modularity",
+          "depends": [
+            "r3"
+          ]
+        },
+        {
+          "id": "r5",
+          "agent": "coder",
+          "instruction": "Finalize engine with clean architecture: add logging, config system, and basic UI (CLI or simple text menu)",
+          "depends": [
+            "r4"
+          ]
+        },
+        {
+          "id": "r6",
+          "agent": "reviewer",
+          "instruction": "Review code for maintainability, modularity, and long-term scalability",
+          "depends": [
+            "r5"
+          ]
+        },
+        {
+          "id": "r7",
+          "agent": "doc",
+          "instruction": "Generate README.md with setup, features, and contribution guide",
+          "depends": [
+            "r6"
+          ]
+        },
+        {
+          "id": "r8",
+          "agent": "visualizer",
+          "instruction": "Generate Mermaid diagram of game architecture: Game → Player → Level → SaveSystem → Config",
+          "depends": [
+            "r7"
+          ]
+        }
+      ]
+    },
+    "success_count": 1,
+    "created_at": "2026-04-14 19:19:00",
+    "last_used": "2026-04-14 19:19:00"
   }
 }
