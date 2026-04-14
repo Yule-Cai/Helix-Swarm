@@ -282,7 +282,7 @@ Helix-Swarm/
 - [ ] Markdown rendering in chat responses
 - [ ] Direct file context passing between agents (not just truncated text)
 - [ ] Live TaskGraph visualization during execution
-- [ ] More language support (Japanese, Korean)
+- [ ] More language support (English，Chinese)
 - [ ] Community plugin marketplace
 
 ---
