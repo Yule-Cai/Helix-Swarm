@@ -1,0 +1,50 @@
+# Helix-Swarm Requirements
+
+# Core dependencies
+rich>=13.0.0
+pyyaml>=6.0
+requests>=2.31.0
+prompt_toolkit>=3.0.0
+
+# LLM API clients
+anthropic>=0.18.0
+openai>=1.12.0
+httpx>=0.25.0
+
+# Vector database for memory persistence
+chromadb>=0.4.0
+
+# Logging
+loguru>=0.7.0
+
+# Data validation
+pydantic>=2.0.0
+
+# Local file readers used by skills/drag_reader.py
+PyPDF2>=3.0.0
+python-docx>=1.1.0
+
+# Optional local MCP demo server
+mcp>=1.0.0
+
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
+
+# Optional dependencies for enhanced features
+# Uncomment as needed:
+
+# For advanced code analysis
+# pylint>=3.0.0
+# black>=23.0.0
+# isort>=5.12.0
+
+# For web scraping
+# beautifulsoup4>=4.12.0
+# lxml>=4.9.0
+
+# For development
+# ipython>=8.12.0
+# ipdb>=0.13.0
