@@ -1,0 +1,62 @@
+# Autonomous AI Researcher - 默认配置
+# 此文件包含系统的所有默认配置
+
+# 研究领域
+research_domain: "AI/ML"
+
+# 实验超时时间（秒）
+experiment_timeout: 300
+
+# 输出格式：latex, pdf, docx
+output_format: "latex"
+
+# 最大研究想法数量
+max_ideas: 5
+
+# 实验配置
+experiment:
+  # 是否使用 GPU
+  use_gpu: false
+  # 随机种子（用于可重复性）
+  random_seed: 42
+  # 数据集分割比例
+  train_split: 0.8
+  val_split: 0.1
+  test_split: 0.1
+
+# 论文配置
+paper:
+  # 论文标题（如果为空，则自动生成）
+  title: ""
+  # 作者
+  authors:
+    - "Autonomous AI Researcher"
+  # 机构
+  institution: "AI Research Lab"
+  # 关键词
+  keywords:
+    - "machine learning"
+    - "artificial intelligence"
+    - "autonomous research"
+
+# 日志配置
+logging:
+  # 日志级别：DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: "INFO"
+  # 日志文件路径（如果为空，则输出到控制台）
+  file: "logs/researcher.log"
+  # 是否启用 Rich 格式化
+  rich_formatting: true
+
+# LLM 配置（如果使用 LLM）
+llm:
+  # 提供商：openai, anthropic, etc.
+  provider: "openai"
+  # 模型名称
+  model: "gpt-4"
+  # API 密钥（建议通过环境变量设置）
+  api_key: ""
+  # 温度参数
+  temperature: 0.7
+  # 最大 tokens
+  max_tokens: 2000

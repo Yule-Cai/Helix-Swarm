@@ -1,0 +1,17 @@
+{
+  "active": "local",
+  "local": {
+    "url": "http://localhost:1234/v1/chat/completions",
+    "model": "google/gemma-4-e4b",
+    "api_key": "not-needed"
+  },
+  "custom": {
+    "url": "",
+    "model": "",
+    "api_key": ""
+  },
+  "theme": "dark",
+  "lang": "zh",
+  "total_tokens_used": 0,
+  "keys_usage": {}
+}

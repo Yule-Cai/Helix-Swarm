@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Helix-Swarm</title>
+  <style>
+    :root { color-scheme: dark; --bg:#09090b; --card:#111827; --text:#e5e7eb; --muted:#9ca3af; --line:#1f2937; --accent:#22c55e; }
+    body { margin:0; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: radial-gradient(circle at top, #172554 0, #09090b 38%); color:var(--text); }
+    main { max-width: 980px; margin: 0 auto; padding: 72px 24px; }
+    .badge { display:inline-flex; border:1px solid #334155; border-radius:999px; padding:6px 12px; color:#bfdbfe; background:rgba(15,23,42,.72); font-size:14px; }
+    h1 { font-size: clamp(44px, 8vw, 86px); line-height:.95; margin:24px 0 18px; letter-spacing:-0.06em; }
+    p { color:var(--muted); font-size:18px; line-height:1.7; max-width:760px; }
+    .actions { display:flex; gap:12px; flex-wrap:wrap; margin:28px 0 44px; }
+    a.button { color:#06130a; background:var(--accent); text-decoration:none; padding:12px 18px; border-radius:12px; font-weight:700; }
+    a.secondary { color:var(--text); background:#111827; border:1px solid var(--line); }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:14px; }
+    .card { border:1px solid var(--line); background:rgba(17,24,39,.82); border-radius:18px; padding:18px; }
+    .card h3 { margin:0 0 8px; font-size:17px; }
+    .card p { font-size:14px; margin:0; }
+    code { background:#020617; border:1px solid #1e293b; padding:2px 6px; border-radius:6px; }
+    pre { background:#020617; border:1px solid #1e293b; padding:16px; border-radius:14px; overflow:auto; }
+    footer { margin-top:48px; color:#64748b; font-size:14px; }
+  </style>
+</head>
+<body>
+  <main>
+    <span class="badge">v0.1-alpha · CLI-first local agent framework</span>
+    <h1>Helix-Swarm</h1>
+    <p>Helix-Swarm is a local-first CLI agent framework for LM Studio and OpenAI-compatible models. It focuses on safe tool use, local file reading, Skill/SOP integration, bilingual CLI output, and evidence-based code review.</p>
+    <div class="actions">
+      <a class="button" href="README.md">Read README</a>
+      <a class="button secondary" href="README.zh-CN.md">中文 README</a>
+      <a class="button secondary" href="https://github.com/Yule-Cai/Helix-Swarm">GitHub</a>
+    </div>
+    <pre><code>python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python3 cli.py</code></pre>
+    <section class="grid">
+      <div class="card"><h3>Local-first</h3><p>Built for LM Studio and OpenAI-compatible local endpoints.</p></div>
+      <div class="card"><h3>Permission-gated</h3><p>Low-risk reads can run automatically; installs, edits, deletes, and terminal commands require review.</p></div>
+      <div class="card"><h3>Evidence Cards</h3><p>Review tasks must cite concrete files, symbols, evidence, consequences, and suggested fixes.</p></div>
+      <div class="card"><h3>Bilingual CLI</h3><p>Switch between Chinese and English using <code>/set lang zh</code> or <code>/set lang en</code>.</p></div>
+    </section>
+    <footer>Built by Yule-Cai for local-first agent experimentation.</footer>
+  </main>
+</body>
+</html>
