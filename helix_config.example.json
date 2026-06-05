@@ -1,17 +1,999 @@
-{
-  "active": "local",
-  "local": {
-    "url": "http://localhost:1234/v1/chat/completions",
-    "model": "google/gemma-4-e4b",
-    "api_key": "not-needed"
-  },
-  "custom": {
-    "url": "",
-    "model": "",
-    "api_key": ""
-  },
-  "theme": "dark",
-  "lang": "zh",
-  "total_tokens_used": 0,
-  "keys_usage": {}
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Helix-Swarm — Local-First CLI Agent Swarm</title>
+  <meta
+    name="description"
+    content="Helix-Swarm is a local-first CLI agent swarm with safe tool approval, SkillHub integration, evidence-based review, and Gemma 4 thinking."
+  />
+
+  <style>
+    :root {
+      --bg: #070a12;
+      --bg-soft: #0b1020;
+      --card: rgba(255, 255, 255, 0.075);
+      --card-strong: rgba(255, 255, 255, 0.11);
+      --border: rgba(255, 255, 255, 0.14);
+      --text: #eef4ff;
+      --muted: #9aa9c2;
+      --cyan: #22d3ee;
+      --blue: #60a5fa;
+      --green: #22c55e;
+      --yellow: #f59e0b;
+      --purple: #a78bfa;
+      --red: #fb7185;
+      --shadow: 0 30px 90px rgba(0, 0, 0, 0.45);
+      --radius: 26px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 15% 8%, rgba(34, 211, 238, 0.20), transparent 32%),
+        radial-gradient(circle at 85% 10%, rgba(167, 139, 250, 0.18), transparent 32%),
+        radial-gradient(circle at 50% 95%, rgba(34, 197, 94, 0.12), transparent 35%),
+        var(--bg);
+      color: var(--text);
+      font-family:
+        Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.08;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(to bottom, black, transparent 80%);
+      z-index: 0;
+    }
+
+    .orb {
+      position: fixed;
+      width: 520px;
+      height: 520px;
+      border-radius: 999px;
+      filter: blur(80px);
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .orb.one {
+      top: -180px;
+      left: -120px;
+      background: #22d3ee;
+    }
+
+    .orb.two {
+      top: 140px;
+      right: -220px;
+      background: #8b5cf6;
+    }
+
+    .orb.three {
+      bottom: -260px;
+      left: 35%;
+      background: #22c55e;
+      opacity: 0.18;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+    }
+
+    .container {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(18px);
+      background: rgba(7, 10, 18, 0.72);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .nav-inner {
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 13px;
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(135deg, rgba(34, 211, 238, 0.9), rgba(167, 139, 250, 0.9));
+      box-shadow: 0 12px 30px rgba(34, 211, 238, 0.24);
+      color: #05121d;
+      font-weight: 900;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .lang-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .lang-toggle button {
+      border: 0;
+      cursor: pointer;
+      padding: 7px 12px;
+      border-radius: 999px;
+      color: var(--muted);
+      background: transparent;
+      font-weight: 700;
+    }
+
+    .lang-toggle button.active {
+      color: #05121d;
+      background: linear-gradient(135deg, var(--cyan), var(--green));
+    }
+
+    .hero {
+      padding: 92px 0 70px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.08fr 0.92fr;
+      gap: 44px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 14px;
+      border: 1px solid rgba(34, 211, 238, 0.25);
+      border-radius: 999px;
+      background: rgba(34, 211, 238, 0.08);
+      color: #b7f7ff;
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 22px;
+    }
+
+    .pulse {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: var(--green);
+      box-shadow: 0 0 0 8px rgba(34, 197, 94, 0.12);
+    }
+
+    h1 {
+      font-size: clamp(44px, 7vw, 84px);
+      line-height: 0.95;
+      letter-spacing: -0.07em;
+      margin-bottom: 24px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #fff, #b7f7ff 42%, #c4b5fd);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-copy {
+      max-width: 680px;
+      color: var(--muted);
+      font-size: 19px;
+      margin-bottom: 30px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 34px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 20px;
+      border-radius: 15px;
+      font-weight: 800;
+      transition: transform 0.2s ease, border 0.2s ease, background 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--cyan), var(--green));
+      color: #05121d;
+      box-shadow: 0 18px 50px rgba(34, 211, 238, 0.2);
+    }
+
+    .btn.secondary {
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.07);
+      color: var(--text);
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .badge {
+      padding: 8px 11px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.045);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .terminal-card {
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.055));
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transform: perspective(900px) rotateY(-4deg) rotateX(2deg);
+    }
+
+    .terminal-top {
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(0, 0, 0, 0.22);
+    }
+
+    .dots {
+      display: flex;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+    }
+
+    .dot.red { background: #fb7185; }
+    .dot.yellow { background: #facc15; }
+    .dot.green { background: #22c55e; }
+
+    .terminal-title {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .terminal-body {
+      padding: 22px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 13.5px;
+      min-height: 420px;
+    }
+
+    .line {
+      margin: 8px 0;
+      color: #dbeafe;
+    }
+
+    .prompt {
+      color: var(--cyan);
+      font-weight: 800;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .green {
+      color: #86efac;
+    }
+
+    .yellow {
+      color: #fde68a;
+    }
+
+    .purple {
+      color: #c4b5fd;
+    }
+
+    .panel {
+      margin: 18px 0;
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(245, 158, 11, 0.28);
+      background: rgba(245, 158, 11, 0.08);
+    }
+
+    .section {
+      padding: 70px 0;
+    }
+
+    .section-head {
+      max-width: 760px;
+      margin-bottom: 34px;
+    }
+
+    .section-kicker {
+      color: var(--cyan);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: clamp(32px, 4vw, 52px);
+      line-height: 1.05;
+      letter-spacing: -0.05em;
+      margin-bottom: 14px;
+    }
+
+    .section-text {
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .grid.cols-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .grid.cols-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .feature-card,
+    .glass-card {
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 24px;
+      background: var(--card);
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.18);
+    }
+
+    .feature-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+      background: rgba(34, 211, 238, 0.12);
+      border: 1px solid rgba(34, 211, 238, 0.22);
+      font-size: 22px;
+    }
+
+    .feature-card h3,
+    .glass-card h3 {
+      font-size: 20px;
+      margin-bottom: 10px;
+      letter-spacing: -0.02em;
+    }
+
+    .feature-card p,
+    .glass-card p {
+      color: var(--muted);
+    }
+
+    .architecture {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .arch-row {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .arch-row:last-child {
+      border-bottom: 0;
+    }
+
+    .arch-label {
+      padding: 22px;
+      color: #b7f7ff;
+      font-weight: 900;
+      background: rgba(34, 211, 238, 0.06);
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .arch-content {
+      padding: 22px;
+      color: var(--muted);
+    }
+
+    .code {
+      padding: 18px;
+      border-radius: 18px;
+      background: rgba(0, 0, 0, 0.34);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      overflow-x: auto;
+      color: #dbeafe;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 14px;
+    }
+
+    .steps {
+      counter-reset: step;
+      display: grid;
+      gap: 14px;
+    }
+
+    .step {
+      position: relative;
+      padding: 22px 22px 22px 76px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--card);
+    }
+
+    .step::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      left: 22px;
+      top: 20px;
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--cyan), var(--green));
+      color: #041018;
+      font-weight: 900;
+    }
+
+    .step h3 {
+      margin-bottom: 6px;
+    }
+
+    .step p {
+      color: var(--muted);
+    }
+
+    .roadmap {
+      display: grid;
+      gap: 12px;
+    }
+
+    .roadmap-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.055);
+      color: var(--muted);
+    }
+
+    .check {
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      background: rgba(34, 197, 94, 0.13);
+      color: #86efac;
+      border: 1px solid rgba(34, 197, 94, 0.25);
+      font-weight: 900;
+    }
+
+    .todo {
+      background: rgba(96, 165, 250, 0.13);
+      color: #bfdbfe;
+      border-color: rgba(96, 165, 250, 0.25);
+    }
+
+    .cta {
+      margin: 70px 0 40px;
+      padding: 46px;
+      border-radius: 34px;
+      background:
+        linear-gradient(135deg, rgba(34, 211, 238, 0.18), rgba(167, 139, 250, 0.16)),
+        rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .cta h2 {
+      margin-bottom: 14px;
+    }
+
+    .cta p {
+      color: var(--muted);
+      max-width: 760px;
+      margin: 0 auto 24px;
+      font-size: 18px;
+    }
+
+    footer {
+      padding: 34px 0 60px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 14px;
+    }
+
+    [data-lang="zh"] {
+      display: none;
+    }
+
+    body.zh [data-lang="en"] {
+      display: none;
+    }
+
+    body.zh [data-lang="zh"] {
+      display: initial;
+    }
+
+    body.zh div[data-lang="zh"],
+    body.zh section[data-lang="zh"],
+    body.zh p[data-lang="zh"] {
+      display: block;
+    }
+
+    @media (max-width: 920px) {
+      .nav-links {
+        display: none;
+      }
+
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .terminal-card {
+        transform: none;
+      }
+
+      .grid.cols-3,
+      .grid.cols-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .arch-row {
+        grid-template-columns: 1fr;
+      }
+
+      .arch-label {
+        border-right: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .hero {
+        padding-top: 58px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="orb one"></div>
+  <div class="orb two"></div>
+  <div class="orb three"></div>
+  <div class="noise"></div>
+
+  <div class="page">
+    <nav class="nav">
+      <div class="container nav-inner">
+        <a class="brand" href="#top">
+          <span class="brand-mark">H</span>
+          <span>Helix-Swarm</span>
+        </a>
+
+        <div class="nav-links">
+          <a href="#features">Features</a>
+          <a href="#architecture">Architecture</a>
+          <a href="#install">Install</a>
+          <a href="#roadmap">Roadmap</a>
+          <a href="https://github.com/Yule-Cai/Helix-Swarm" target="_blank" rel="noreferrer">GitHub</a>
+        </div>
+
+        <div class="lang-toggle" aria-label="Language switcher">
+          <button id="btn-en" class="active" onclick="setLang('en')">EN</button>
+          <button id="btn-zh" onclick="setLang('zh')">中文</button>
+        </div>
+      </div>
+    </nav>
+
+    <header id="top" class="hero">
+      <div class="container hero-grid">
+        <div>
+          <div class="eyebrow">
+            <span class="pulse"></span>
+            <span data-lang="en">Local-first CLI Agent Swarm</span>
+            <span data-lang="zh">本地优先的 CLI Agent Swarm</span>
+          </div>
+
+          <h1>
+            <span class="gradient-text" data-lang="en">Safe local agents for real terminal workflows.</span>
+            <span class="gradient-text" data-lang="zh">面向真实终端工作流的安全本地 Agent。</span>
+          </h1>
+
+          <p class="hero-copy" data-lang="en">
+            Helix-Swarm connects local models, SkillHub skills, file reading, permission-gated tool execution,
+            evidence-based review, and Gemma 4 thinking into one practical CLI agent framework.
+          </p>
+
+          <p class="hero-copy" data-lang="zh">
+            Helix-Swarm 将本地模型、SkillHub 技能、文件读取、工具调用审查、证据卡审查和 Gemma 4 thinking
+            整合成一个实用的 CLI Agent 框架。
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn primary" href="https://github.com/Yule-Cai/Helix-Swarm" target="_blank" rel="noreferrer">
+              <span data-lang="en">View on GitHub</span>
+              <span data-lang="zh">查看 GitHub</span>
+              <span>↗</span>
+            </a>
+            <a class="btn secondary" href="#install">
+              <span data-lang="en">Quick Start</span>
+              <span data-lang="zh">快速开始</span>
+            </a>
+          </div>
+
+          <div class="badges">
+            <span class="badge">LM Studio</span>
+            <span class="badge">Gemma 4 Thinking</span>
+            <span class="badge">SkillHub</span>
+            <span class="badge">Permission Gate</span>
+            <span class="badge">Evidence Cards</span>
+          </div>
+        </div>
+
+        <div class="terminal-card">
+          <div class="terminal-top">
+            <div class="dots">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+            </div>
+            <div class="terminal-title">helix-swarm / local</div>
+          </div>
+
+          <div class="terminal-body">
+            <div class="line"><span class="prompt">❯</span> /set lang en</div>
+            <div class="line green">✅ UI config updated: lang = en</div>
+            <div class="line"><span class="prompt">❯</span> skillhub search calendar</div>
+            <div class="line muted">📋 Task type: chat</div>
+            <div class="line green">✅ Low-risk query command, auto-running...</div>
+            <div class="line yellow">calendar-cli · google-calendar · google-calendar-api</div>
+
+            <div class="panel">
+              <div class="line yellow">🛡️ Direct Terminal Command Review</div>
+              <div class="line">Command: <span class="purple">skillhub install calendar-cli</span></div>
+              <div class="line">Risk level: <span class="yellow">high</span></div>
+              <div class="line muted">Y = Approve · N = Deny · B = Block</div>
+            </div>
+
+            <div class="line"><span class="prompt">❯</span> Review current project, read-only.</div>
+            <div class="line green">Evidence Card 1</div>
+            <div class="line muted">File: core/permission_manager.py</div>
+            <div class="line muted">Symbol: _is_in_workspace()</div>
+            <div class="line muted">Evidence: concrete path boundary check...</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section id="features" class="section">
+        <div class="container">
+          <div class="section-head">
+            <div class="section-kicker">Features</div>
+            <h2 data-lang="en">Built for useful local autonomy, not blind automation.</h2>
+            <h2 data-lang="zh">为有用的本地自主能力而设计，不是盲目自动化。</h2>
+            <p class="section-text" data-lang="en">
+              Helix-Swarm gives local agents practical tool access while keeping risky actions visible and reviewable.
+            </p>
+            <p class="section-text" data-lang="zh">
+              Helix-Swarm 让本地 Agent 能真正使用工具，同时让高风险操作保持可见、可审查。
+            </p>
+          </div>
+
+          <div class="grid cols-3">
+            <div class="feature-card">
+              <div class="feature-icon">🛡️</div>
+              <h3 data-lang="en">Permission-gated tools</h3>
+              <h3 data-lang="zh">工具权限审查</h3>
+              <p data-lang="en">Low-risk read/search tools can be auto-approved, while install, shell, write, and delete operations require confirmation.</p>
+              <p data-lang="zh">读取和搜索类低风险工具可自动允许；安装、终端、写入和删除操作需要用户确认。</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon">🧠</div>
+              <h3 data-lang="en">Gemma 4 thinking</h3>
+              <h3 data-lang="zh">Gemma 4 Thinking</h3>
+              <p data-lang="en">Automatically detects Gemma 4-style model names and enables thinking mode while filtering reasoning from memory.</p>
+              <p data-lang="zh">自动识别 Gemma 4 系列模型并开启 thinking mode，同时避免把内部推理写入记忆。</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon">📚</div>
+              <h3 data-lang="en">SkillHub integration</h3>
+              <h3 data-lang="zh">SkillHub 集成</h3>
+              <p data-lang="en">Search, inspect, and compare skills before installation, so agents do not blindly install capabilities.</p>
+              <p data-lang="zh">支持安装前搜索、检查和比较 Skill，避免 Agent 盲目安装能力。</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon">🧾</div>
+              <h3 data-lang="en">Evidence Card review</h3>
+              <h3 data-lang="zh">证据卡审查</h3>
+              <p data-lang="en">Review tasks must cite concrete files, symbols, evidence, risk, consequence, and suggested fixes.</p>
+              <p data-lang="zh">审查任务必须给出文件、函数、证据、风险、后果和修复建议。</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon">📄</div>
+              <h3 data-lang="en">Local file reading</h3>
+              <h3 data-lang="zh">本地文件读取</h3>
+              <p data-lang="en">Detects local file paths and routes PDF, DOCX, Markdown, text, and source files into the agent workflow.</p>
+              <p data-lang="zh">识别本地文件路径，并将 PDF、DOCX、Markdown、文本和源代码文件送入 Agent 流程。</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon">🌐</div>
+              <h3 data-lang="en">Bilingual CLI</h3>
+              <h3 data-lang="zh">中英文 CLI</h3>
+              <p data-lang="en">Switch interface language with /set lang en or /set lang zh, including prompts, panels, and review templates.</p>
+              <p data-lang="zh">通过 /set lang en 或 /set lang zh 切换界面语言，覆盖提示、面板和审查模板。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="architecture" class="section">
+        <div class="container">
+          <div class="section-head">
+            <div class="section-kicker">Architecture</div>
+            <h2 data-lang="en">A supervisor-agent loop with tool review.</h2>
+            <h2 data-lang="zh">带工具审查的 Supervisor-Agent 循环。</h2>
+            <p class="section-text" data-lang="en">
+              The CLI routes commands, Leo supervises specialist agents, and the permission manager reviews risky tools.
+            </p>
+            <p class="section-text" data-lang="zh">
+              CLI 负责路由命令，Leo 监督专家 Agent，权限管理器审查高风险工具调用。
+            </p>
+          </div>
+
+          <div class="architecture">
+            <div class="arch-row">
+              <div class="arch-label">CLI Router</div>
+              <div class="arch-content" data-lang="en">Handles slash commands, direct shell command detection, task classification, and language-aware UI.</div>
+              <div class="arch-content" data-lang="zh">处理 Slash 命令、直接终端命令检测、任务分类和语言感知 UI。</div>
+            </div>
+            <div class="arch-row">
+              <div class="arch-label">Leo Supervisor</div>
+              <div class="arch-content" data-lang="en">Delegates work to File Agent, Search Agent, Reviewer, and Computer Agent.</div>
+              <div class="arch-content" data-lang="zh">将任务委派给 File Agent、Search Agent、Reviewer 和 Computer Agent。</div>
+            </div>
+            <div class="arch-row">
+              <div class="arch-label">Tool Registry</div>
+              <div class="arch-content" data-lang="en">Discovers Python tools and Markdown SOP skills from tools/ and skills/.</div>
+              <div class="arch-content" data-lang="zh">从 tools/ 和 skills/ 中发现 Python 工具和 Markdown SOP 技能。</div>
+            </div>
+            <div class="arch-row">
+              <div class="arch-label">Permission Manager</div>
+              <div class="arch-content" data-lang="en">Reviews terminal commands, installs, file writes, edits, deletes, and dangerous shell patterns.</div>
+              <div class="arch-content" data-lang="zh">审查终端命令、安装、文件写入、编辑、删除和危险 shell 模式。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="install" class="section">
+        <div class="container">
+          <div class="section-head">
+            <div class="section-kicker">Installation</div>
+            <h2 data-lang="en">Start with a local model server.</h2>
+            <h2 data-lang="zh">从本地模型服务开始。</h2>
+            <p class="section-text" data-lang="en">
+              Use LM Studio or any OpenAI-compatible endpoint. Then run Helix-Swarm from the terminal.
+            </p>
+            <p class="section-text" data-lang="zh">
+              使用 LM Studio 或任何 OpenAI-compatible endpoint，然后在终端中运行 Helix-Swarm。
+            </p>
+          </div>
+
+          <div class="grid cols-2">
+            <div class="glass-card">
+              <h3 data-lang="en">Quick start</h3>
+              <h3 data-lang="zh">快速开始</h3>
+              <div class="code">git clone https://github.com/Yule-Cai/Helix-Swarm.git
+cd Helix-Swarm
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python3 cli.py</div>
+            </div>
+
+            <div class="glass-card">
+              <h3 data-lang="en">Configure model</h3>
+              <h3 data-lang="zh">配置模型</h3>
+              <div class="code">/set url http://localhost:1234/v1/chat/completions
+/set model google/gemma-4-e4b
+/set lang en
+
+# Switch back to Chinese
+/set lang zh</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="workflow" class="section">
+        <div class="container">
+          <div class="section-head">
+            <div class="section-kicker">Workflow</div>
+            <h2 data-lang="en">Ask naturally, approve carefully.</h2>
+            <h2 data-lang="zh">自然提问，谨慎确认。</h2>
+          </div>
+
+          <div class="steps">
+            <div class="step">
+              <h3 data-lang="en">Describe the task</h3>
+              <h3 data-lang="zh">描述任务</h3>
+              <p data-lang="en">Ask the CLI to read a file, compare SkillHub skills, review a project, or run a command.</p>
+              <p data-lang="zh">让 CLI 读取文件、比较 SkillHub 技能、审查项目或执行命令。</p>
+            </div>
+
+            <div class="step">
+              <h3 data-lang="en">Inspect tool calls</h3>
+              <h3 data-lang="zh">检查工具调用</h3>
+              <p data-lang="en">Safe native tools can pass automatically; risky operations are shown in a review panel.</p>
+              <p data-lang="zh">安全原生工具可以自动通过；高风险操作会显示在审查面板中。</p>
+            </div>
+
+            <div class="step">
+              <h3 data-lang="en">Approve or deny</h3>
+              <h3 data-lang="zh">确认或拒绝</h3>
+              <p data-lang="en">Press Y to approve, N to deny, or B to block the tool for the current session.</p>
+              <p data-lang="zh">按 Y 确认，N 拒绝，B 禁止该工具在本会话继续调用。</p>
+            </div>
+
+            <div class="step">
+              <h3 data-lang="en">Verify the result</h3>
+              <h3 data-lang="zh">验证结果</h3>
+              <p data-lang="en">Evidence Card review makes project audits traceable to concrete files and symbols.</p>
+              <p data-lang="zh">Evidence Card 让项目审查可以追溯到具体文件和函数。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="roadmap" class="section">
+        <div class="container">
+          <div class="section-head">
+            <div class="section-kicker">Roadmap</div>
+            <h2 data-lang="en">What is next?</h2>
+            <h2 data-lang="zh">下一步计划</h2>
+          </div>
+
+          <div class="roadmap">
+            <div class="roadmap-item"><span class="check">✓</span><span>CLI-first local agent loop / CLI 优先的本地 Agent 主循环</span></div>
+            <div class="roadmap-item"><span class="check">✓</span><span>Permission-gated terminal execution / 终端执行权限审查</span></div>
+            <div class="roadmap-item"><span class="check">✓</span><span>Evidence Card review mode / 证据卡审查模式</span></div>
+            <div class="roadmap-item"><span class="check">✓</span><span>Gemma 4 thinking detection / Gemma 4 thinking 自动识别</span></div>
+            <div class="roadmap-item"><span class="check todo">→</span><span>/image command for vision models / 面向视觉模型的 /image 命令</span></div>
+            <div class="roadmap-item"><span class="check todo">→</span><span>Unified /file pipeline for PDF, DOCX, XLSX, images, and ZIP / 统一文件管线</span></div>
+            <div class="roadmap-item"><span class="check todo">→</span><span>Stronger reviewer verifier / 更强的审查验证器</span></div>
+            <div class="roadmap-item"><span class="check todo">→</span><span>Optional lightweight Web UI / 可选轻量 Web UI</span></div>
+          </div>
+
+          <div class="cta">
+            <h2 data-lang="en">Build safer local agents.</h2>
+            <h2 data-lang="zh">构建更安全的本地 Agent。</h2>
+            <p data-lang="en">
+              Helix-Swarm is experimental, but already useful for local tool workflows, project review, SkillHub exploration, and terminal-assisted tasks.
+            </p>
+            <p data-lang="zh">
+              Helix-Swarm 仍处于实验阶段，但已经可以用于本地工具工作流、项目审查、SkillHub 探索和终端辅助任务。
+            </p>
+            <a class="btn primary" href="https://github.com/Yule-Cai/Helix-Swarm" target="_blank" rel="noreferrer">
+              <span data-lang="en">Open GitHub Repository</span>
+              <span data-lang="zh">打开 GitHub 仓库</span>
+              <span>↗</span>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      MIT License · Built with ❤️ by Yule-Cai · Helix-Swarm
+    </footer>
+  </div>
+
+  <script>
+    function setLang(lang) {
+      document.body.classList.toggle("zh", lang === "zh");
+      document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+      localStorage.setItem("helix-lang", lang);
+
+      document.getElementById("btn-en").classList.toggle("active", lang === "en");
+      document.getElementById("btn-zh").classList.toggle("active", lang === "zh");
+    }
+
+    const savedLang = localStorage.getItem("helix-lang") || "en";
+    setLang(savedLang);
+  </script>
+</body>
+</html>
