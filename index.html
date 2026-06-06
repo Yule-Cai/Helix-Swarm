@@ -3,72 +3,1532 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Helix-Swarm — Double-helix control for agent swarms</title>
-  <meta name="description" content="Helix-Swarm is a double-helix control architecture for safer agent swarms." />
+  <meta
+    name="description"
+    content="Helix-Swarm is a double-helix control architecture for safer agent swarms: permission-first execution, evidence-based review, and skill-aware workflows."
+  />
+
   <style>
-    :root{--bg:#fbfaf6;--paper:rgba(255,253,248,.9);--ink:#151515;--muted:#66615a;--line:#171717;--green:#2f6f4e;--green-soft:#dfeadc;--orange:#d98435;--orange-soft:#f5dec6;--yellow:#f2d16b;--blue-soft:#dfe9f5;--mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;--sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    *{box-sizing:border-box;margin:0;padding:0} html{scroll-behavior:smooth} body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.5;overflow-x:hidden} a{color:inherit;text-decoration:none} button{font-family:inherit}
-    #dna-bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none;opacity:.68}.soft-light{pointer-events:none;position:fixed;inset:0;z-index:0;background:radial-gradient(circle at 12% 12%,rgba(47,111,78,.10),transparent 30%),radial-gradient(circle at 88% 12%,rgba(217,132,53,.10),transparent 30%),linear-gradient(to bottom,rgba(251,250,246,.10),rgba(251,250,246,.95) 76%)}.grain{pointer-events:none;position:fixed;inset:0;opacity:.10;background-image:linear-gradient(rgba(20,20,20,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(20,20,20,.035) 1px,transparent 1px);background-size:34px 34px;mask-image:linear-gradient(to bottom,black,transparent 80%);z-index:0}
-    .page{position:relative;z-index:1}.container{width:min(1160px,calc(100% - 36px));margin:0 auto}.nav{position:sticky;top:0;z-index:20;background:rgba(251,250,246,.78);backdrop-filter:blur(20px);border-bottom:1px solid rgba(20,20,20,.08)}.nav-inner{height:72px;display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:-.04em}.brand-mark{width:38px;height:38px;border:2px solid var(--line);border-radius:999px;display:grid;place-items:center;font-weight:950;background:var(--yellow);box-shadow:3px 3px 0 var(--line)}.nav-links{display:flex;align-items:center;gap:22px;font-size:14px;color:var(--muted);font-weight:650}.nav-links a:hover{color:var(--ink)}.lang{display:flex;border:1.5px solid var(--line);border-radius:999px;background:#fffdf8;overflow:hidden;box-shadow:2px 2px 0 var(--line)}.lang button{border:0;background:transparent;padding:8px 13px;font-weight:850;cursor:pointer;color:var(--muted)}.lang button.active{background:var(--ink);color:#fffdf8}
-    .hero{min-height:calc(100vh - 72px);padding:74px 0 64px;display:flex;align-items:center}.hero-grid{display:grid;grid-template-columns:1.02fr .98fr;gap:54px;align-items:center}.mini-label{display:inline-flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:999px;padding:9px 14px;background:rgba(255,253,248,.86);backdrop-filter:blur(12px);box-shadow:3px 3px 0 var(--line);font-size:13px;font-weight:850;margin-bottom:26px}.mini-dot{width:10px;height:10px;background:var(--green);border-radius:999px}h1{font-size:clamp(54px,8.4vw,108px);line-height:.88;letter-spacing:-.085em;margin-bottom:26px;max-width:920px}.hero-copy{font-size:clamp(18px,2vw,23px);color:var(--muted);max-width:700px;margin-bottom:32px}.hero-actions{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:30px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:14px 19px;border:2px solid var(--line);border-radius:999px;font-weight:900;transition:transform .18s ease,box-shadow .18s ease;cursor:pointer}.btn:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--line)}.btn.primary{background:var(--green);color:white;box-shadow:3px 3px 0 var(--line)}.btn.secondary{background:rgba(255,253,248,.88);box-shadow:3px 3px 0 var(--line)}.badges{display:flex;flex-wrap:wrap;gap:10px}.badge{padding:8px 11px;border:1.5px solid rgba(20,20,20,.16);border-radius:999px;color:var(--muted);background:rgba(255,253,248,.76);backdrop-filter:blur(12px);font-size:13px;font-weight:800}
-    .helix-card,.card,.agent-item,.agent-detail,.demo-map,.architecture,.big-panel,.roadmap-item,.cta{border:2px solid var(--line);background:var(--paper);backdrop-filter:blur(16px);box-shadow:5px 5px 0 var(--line)}.helix-card{position:relative;border-radius:38px;padding:28px;box-shadow:12px 12px 0 var(--line);transform:rotate(-1.2deg);min-height:540px;overflow:hidden}.helix-card:before{content:"";position:absolute;inset:16px;border-radius:28px;border:1px dashed rgba(20,20,20,.16);pointer-events:none}.helix-title{position:relative;z-index:2;font-size:24px;font-weight:950;letter-spacing:-.04em;margin-bottom:10px}.helix-sub{position:relative;z-index:2;color:var(--muted);max-width:400px;margin-bottom:24px}.helix-visual{position:relative;z-index:2;height:330px;margin:8px 0 18px}.strand{position:absolute;top:0;bottom:0;width:44%;border:3px solid var(--line);border-top:0;border-bottom:0;border-radius:50%}.strand.left{left:22%;transform:rotate(14deg);border-color:var(--green)}.strand.right{right:22%;transform:rotate(-14deg);border-color:var(--orange)}.rung{position:absolute;left:22%;right:22%;height:2px;background:var(--line);transform-origin:center;opacity:.78}.rung:nth-child(3){top:14%;transform:rotate(12deg)}.rung:nth-child(4){top:30%;transform:rotate(-10deg)}.rung:nth-child(5){top:46%;transform:rotate(10deg)}.rung:nth-child(6){top:62%;transform:rotate(-12deg)}.rung:nth-child(7){top:78%;transform:rotate(9deg)}.helix-node{position:absolute;padding:9px 11px;border:2px solid var(--line);border-radius:999px;background:var(--yellow);box-shadow:3px 3px 0 var(--line);font-size:12px;font-weight:900;z-index:3}.node-a{top:7%;left:3%}.node-b{top:37%;right:1%;background:var(--green-soft)}.node-c{bottom:12%;left:8%;background:var(--blue-soft)}
-    .terminal-mini,.demo-terminal{border:2px solid var(--line);background:#222a36;color:#d8dee9;font-family:var(--mono)}.terminal-mini{position:relative;z-index:2;border-radius:20px;padding:16px;font-size:12px;box-shadow:5px 5px 0 var(--line)}.prompt{color:#7ee787;font-weight:900}.dim,.cli-muted{color:#8b949e}.ok,.cli-green{color:#7ee787;font-weight:700}.warn,.cli-yellow{color:#f2cc60;font-weight:700}.blue{color:#93c5fd}.line{margin:6px 0}.cli-text{color:#d8dee9}.cli-cyan{color:#8be9fd;font-weight:700}.cli-red{color:#ff7b72;font-weight:700}.cli-purple{color:#d2a8ff;font-weight:700}
-    .section{padding:88px 0;border-top:1px solid rgba(20,20,20,.08);background:linear-gradient(to bottom,rgba(251,250,246,.42),rgba(251,250,246,.82))}.section-head{display:grid;grid-template-columns:.82fr 1.18fr;gap:30px;align-items:end;margin-bottom:36px}.section-kicker{text-transform:uppercase;letter-spacing:.16em;font-size:12px;font-weight:950;color:var(--green);margin-bottom:10px}h2{font-size:clamp(38px,5vw,72px);line-height:.92;letter-spacing:-.07em}.section-text{font-size:19px;color:var(--muted);max-width:740px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{border-radius:24px;padding:22px;min-height:230px;transition:transform .18s ease,box-shadow .18s ease}.card:hover{transform:translate(-3px,-3px) rotate(-.5deg);box-shadow:9px 9px 0 var(--line)}.card:nth-child(even):hover{transform:translate(-3px,-3px) rotate(.5deg)}.card-index,.agent-code,.flow-index,.mark{display:grid;place-items:center;border:2px solid var(--line);background:var(--green-soft);box-shadow:3px 3px 0 var(--line);font-family:var(--mono);font-weight:950}.card-index{width:48px;height:48px;border-radius:16px;font-size:14px;margin-bottom:18px}.card:nth-child(2) .card-index,.card:nth-child(5) .card-index{background:var(--orange-soft)}.card:nth-child(3) .card-index,.card:nth-child(6) .card-index{background:var(--blue-soft)}.card h3{font-size:22px;letter-spacing:-.035em;margin-bottom:10px}.card p{color:var(--muted)}
-    .agent-layout{display:grid;grid-template-columns:1fr 1.05fr;gap:22px;align-items:stretch}.agent-list{display:grid;gap:12px}.agent-item{width:100%;text-align:left;border-radius:20px;padding:18px;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,background .18s ease}.agent-item:hover,.agent-item.active{transform:translate(-3px,-3px);box-shadow:8px 8px 0 var(--line);background:var(--green-soft)}.agent-code{display:inline-grid;min-width:48px;height:30px;border-radius:999px;background:#fffdf8;font-size:12px;margin-bottom:12px}.agent-item h3{font-size:22px;letter-spacing:-.04em;margin-bottom:6px}.agent-item p{color:var(--muted)}.agent-detail{border-radius:34px;padding:28px;min-height:100%;position:sticky;top:96px;box-shadow:8px 8px 0 var(--line)}.agent-detail-label{display:inline-flex;border:2px solid var(--line);border-radius:999px;padding:7px 11px;background:var(--yellow);box-shadow:3px 3px 0 var(--line);font-family:var(--mono);font-size:12px;font-weight:950;margin-bottom:20px}.agent-detail h3{font-size:clamp(34px,4vw,56px);line-height:.95;letter-spacing:-.07em;margin-bottom:16px}.agent-detail p{color:var(--muted);font-size:18px;margin-bottom:22px}.agent-meta{display:grid;gap:12px}.agent-meta-row{border:2px solid var(--line);border-radius:16px;background:rgba(255,255,255,.42);padding:14px}.agent-meta-row strong{display:block;font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
-    .demo-shell{display:grid;grid-template-columns:1.05fr .95fr;gap:20px;align-items:stretch}.demo-terminal{border-radius:28px;overflow:hidden;box-shadow:8px 8px 0 var(--line)}.demo-terminal-top{height:48px;border-bottom:2px solid #000;background:#242424;display:flex;align-items:center;justify-content:space-between;padding:0 16px}.dots{display:flex;gap:8px}.dot{width:12px;height:12px;border-radius:999px;border:1.5px solid #000}.dot.red{background:#ff7b7b}.dot.yellow{background:#f4d35e}.dot.green{background:#80d39b}.terminal-title{color:#aaa;font-family:var(--mono);font-size:12px}.demo-terminal-body{position:relative;padding:0;min-height:560px;background:#222a36;color:#d8dee9;font-family:var(--mono);font-size:13px;overflow:hidden}.cli-screen{padding:22px 22px 52px;min-height:560px}.demo-line{opacity:0;transform:translateY(8px);margin:9px 0;white-space:normal}.demo-line.show{opacity:1;transform:translateY(0);transition:opacity .28s ease,transform .28s ease}.cli-path{color:#f2cc60;font-weight:800;margin-top:4px}.cli-help{margin-top:18px;color:#8b949e}.cli-ready-card{width:min(520px,100%);border:1.5px solid #7dd3fc;border-radius:3px;padding:12px 14px;margin:12px 0 18px;background:rgba(15,23,42,.20)}.cli-ready-title{color:#8be9fd;text-align:center;font-weight:900;margin-bottom:4px}.cli-review-card{border:1.5px solid #f2cc60;border-radius:4px;padding:14px;margin:14px 0;background:rgba(242,204,96,.035)}.cli-review-title{color:#f2cc60;text-align:center;font-weight:900;margin-bottom:10px;border-bottom:1px solid rgba(242,204,96,.35);padding-bottom:6px}.cli-review-grid{display:grid;grid-template-columns:105px 1fr;gap:8px 12px;align-items:start}.cli-review-grid pre{margin:0;color:#8b949e;white-space:pre-wrap;font-family:var(--mono);line-height:1.55}.cli-choices{display:grid;gap:4px;margin-top:14px}.cli-statusbar{position:absolute;left:0;right:0;bottom:0;height:28px;display:grid;grid-template-columns:1fr 1fr 1fr 1.15fr;align-items:center;background:#e5e7eb;color:#1f2937;font-family:var(--mono);font-size:12px;border-top:1px solid #cbd5e1}.cli-statusbar span{padding:0 12px;border-right:1px solid #cbd5e1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cli-statusbar span:last-child{border-right:0;background:#bfdbfe;color:#0f172a;font-weight:800}.cli-spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(139,148,158,.35);border-top-color:#8be9fd;border-radius:999px;vertical-align:-2px;margin-right:6px;animation:cliSpin .75s linear infinite}.cli-cursor{display:inline-block;width:8px;height:16px;background:#d8dee9;vertical-align:-3px;margin-left:4px;animation:cliBlink 1s steps(1) infinite}@keyframes cliSpin{to{transform:rotate(360deg)}}@keyframes cliBlink{0%,49%{opacity:1}50%,100%{opacity:0}}.demo-output{margin-top:16px;border:1.5px solid rgba(134,239,172,.58);background:rgba(134,239,172,.08);border-radius:14px;padding:14px}.demo-map{border-radius:34px;box-shadow:8px 8px 0 var(--line);padding:24px}.demo-flow{display:grid;gap:12px;margin-top:18px}.flow-step{border:2px solid var(--line);border-radius:18px;padding:15px;background:rgba(255,255,255,.46);display:grid;grid-template-columns:52px 1fr;gap:14px;align-items:center;opacity:.48;transform:translateX(0);transition:opacity .28s ease,transform .28s ease,background .28s ease}.flow-step.active{opacity:1;transform:translateX(-4px);background:var(--green-soft)}.flow-index{width:42px;height:42px;border-radius:14px;background:#fffdf8;font-size:12px}.flow-step h3{font-size:17px;letter-spacing:-.03em;margin-bottom:2px}.flow-step p{color:var(--muted);font-size:14px}.replay-button{margin-top:18px;border:2px solid var(--line);border-radius:999px;padding:11px 14px;background:#fffdf8;box-shadow:3px 3px 0 var(--line);font-weight:900;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease}.replay-button:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--line)}
-    .architecture{border-radius:34px;box-shadow:8px 8px 0 var(--line);overflow:hidden}.arch-row{display:grid;grid-template-columns:240px 1fr;border-bottom:2px solid var(--line)}.arch-row:last-child{border-bottom:0}.arch-label{padding:22px;font-weight:950;background:rgba(223,234,220,.9);border-right:2px solid var(--line)}.arch-content{padding:22px;color:var(--muted)}.split{display:grid;grid-template-columns:1fr 1fr;gap:20px}.big-panel{border-radius:34px;padding:28px;box-shadow:8px 8px 0 var(--line)}.big-panel h3{font-size:30px;letter-spacing:-.05em;margin-bottom:12px}.big-panel p{color:var(--muted);margin-bottom:18px}.code{border:2px solid var(--line);border-radius:18px;padding:18px;background:#161616;color:#f6f1e7;font-family:var(--mono);font-size:13px;overflow-x:auto;box-shadow:4px 4px 0 var(--line);white-space:pre}.roadmap{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.roadmap-item{border-radius:20px;display:flex;gap:12px;align-items:flex-start;padding:17px;color:var(--muted)}.mark{width:26px;height:26px;flex:0 0 auto;border-radius:9px;font-size:12px}.mark.todo{background:var(--blue-soft);color:#426b94}.cta{text-align:center;border-radius:40px;padding:54px 26px;background:rgba(223,234,220,.9);box-shadow:10px 10px 0 var(--line)}.cta h2{margin-bottom:16px}.cta p{color:var(--muted);max-width:760px;margin:0 auto 26px;font-size:19px}footer{padding:36px 0 60px;text-align:center;color:var(--muted);font-size:14px;background:rgba(251,250,246,.74)}
-    [data-lang="zh"]{display:none}body.zh [data-lang="en"]{display:none}body.zh [data-lang="zh"]{display:inline}body.zh p[data-lang="zh"],body.zh div[data-lang="zh"],body.zh section[data-lang="zh"],body.zh h1[data-lang="zh"],body.zh h2[data-lang="zh"],body.zh h3[data-lang="zh"],body.zh span[data-lang="zh"],body.zh a[data-lang="zh"]{display:block}body.zh .nav-links span[data-lang="zh"],body.zh .btn span[data-lang="zh"],body.zh .mini-label span[data-lang="zh"],body.zh .badge[data-lang="zh"]{display:inline}
-    @media (prefers-reduced-motion:reduce){#dna-bg{display:none}*{scroll-behavior:auto!important}.demo-line{opacity:1;transform:none}.flow-step{opacity:1}.cli-spinner,.cli-cursor{animation:none}}@media (max-width:960px){.nav-links{display:none}.hero{padding-top:48px}.hero-grid,.section-head,.split,.agent-layout,.demo-shell{grid-template-columns:1fr}.cards,.roadmap{grid-template-columns:1fr}.helix-card{transform:none}.agent-detail{position:static}.arch-row{grid-template-columns:1fr}.arch-label{border-right:0;border-bottom:2px solid var(--line)}}@media (max-width:720px){.cli-statusbar{grid-template-columns:1fr;height:auto;position:static}.cli-statusbar span{padding:6px 12px;border-right:0;border-bottom:1px solid #cbd5e1}.cli-screen{padding-bottom:22px}.cli-review-grid{grid-template-columns:1fr}}
+    :root {
+      --bg: #fbfaf6;
+      --paper: rgba(255, 253, 248, 0.92);
+      --paper-solid: #fffdf8;
+      --ink: #121212;
+      --muted: #5f5a53;
+      --line: #171717;
+      --green: #2f6f4e;
+      --green-soft: #dfeadc;
+      --cyan: #89dce3;
+      --cyan-dark: #34777d;
+      --orange: #d98435;
+      --orange-soft: #f5dec6;
+      --yellow: #f2d16b;
+      --blue-soft: #dfe9f5;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --radius-xl: 34px;
+      --radius-lg: 24px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; }
+
+    #dna-bg {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.38;
+    }
+
+    .soft-light {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(circle at 16% 9%, rgba(47, 111, 78, 0.10), transparent 28%),
+        radial-gradient(circle at 86% 12%, rgba(137, 220, 227, 0.16), transparent 28%),
+        linear-gradient(to bottom, rgba(251, 250, 246, 0.22), rgba(251, 250, 246, 0.96) 76%);
+    }
+
+    .grain {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      opacity: 0.08;
+      background-image:
+        linear-gradient(rgba(20,20,20,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(20,20,20,.04) 1px, transparent 1px);
+      background-size: 36px 36px;
+      mask-image: linear-gradient(to bottom, black, transparent 82%);
+      z-index: 0;
+    }
+
+    .page { position: relative; z-index: 1; }
+    .container { width: min(1520px, calc(100% - 36px)); margin: 0 auto; }
+    .narrow { width: min(1280px, calc(100% - 36px)); margin: 0 auto; }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: rgba(251, 250, 246, 0.82);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(20, 20, 20, 0.08);
+    }
+
+    .nav-inner {
+      height: 70px;
+      width: min(1480px, calc(100% - 28px));
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 26px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 950;
+      letter-spacing: -0.04em;
+      white-space: nowrap;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border: 2px solid var(--line);
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-weight: 950;
+      background: var(--cyan);
+      box-shadow: 3px 3px 0 var(--line);
+    }
+
+    .nav-links {
+      justify-self: center;
+      display: flex;
+      align-items: center;
+      gap: clamp(16px, 2.2vw, 34px);
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 750;
+    }
+    .nav-links a:hover { color: var(--ink); }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      justify-self: end;
+    }
+
+    .github-pill {
+      border: 1.5px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: var(--paper-solid);
+      box-shadow: 2px 2px 0 var(--line);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .lang {
+      display: flex;
+      border: 1.5px solid var(--line);
+      border-radius: 999px;
+      background: var(--paper-solid);
+      overflow: hidden;
+      box-shadow: 2px 2px 0 var(--line);
+    }
+    .lang button {
+      border: 0;
+      background: transparent;
+      padding: 8px 13px;
+      font-weight: 850;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    .lang button.active { background: var(--ink); color: var(--paper-solid); }
+
+    .hero {
+      min-height: calc(100vh - 70px);
+      padding: 54px 0 58px;
+      display: flex;
+      align-items: center;
+    }
+
+    .hero-panel {
+      width: 100%;
+      border: 2px solid var(--line);
+      border-radius: 36px;
+      background: rgba(255,253,248,.88);
+      backdrop-filter: blur(18px);
+      box-shadow: 8px 8px 0 var(--line);
+      padding: clamp(20px, 3vw, 44px);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero-panel::before {
+      content: "";
+      position: absolute;
+      inset: 16px;
+      border: 1px solid rgba(20, 20, 20, 0.07);
+      border-radius: 26px;
+      pointer-events: none;
+    }
+
+    .hero-topline {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .mini-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      border: 1.5px solid var(--line);
+      border-radius: 999px;
+      padding: 9px 14px;
+      background: rgba(255, 253, 248, 0.92);
+      box-shadow: 3px 3px 0 var(--line);
+      font-size: 13px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .mini-dot { width: 10px; height: 10px; background: var(--green); border-radius: 999px; }
+
+    .hero-version {
+      display: inline-flex;
+      border: 1.5px solid rgba(20,20,20,.26);
+      border-radius: 999px;
+      padding: 9px 14px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 800;
+      background: rgba(255,253,248,.7);
+    }
+
+    .ascii-wrap {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      overflow: hidden;
+      margin: 0 auto 28px;
+      background:
+        linear-gradient(135deg, rgba(32,41,54,.98), rgba(26,34,45,.98)),
+        #202936;
+      border: 1.5px solid rgba(18,18,18,.9);
+      border-radius: 24px;
+      box-shadow: 5px 5px 0 rgba(18,18,18,.92);
+      padding: clamp(12px, 1.8vw, 22px) clamp(14px, 2.3vw, 28px);
+    }
+
+    .ascii-logo {
+      margin: 0;
+      color: var(--cyan);
+      text-shadow: 2px 2px 0 rgba(52,119,125,.7);
+      font-family: var(--mono);
+      font-size: clamp(8px, 1.34vw, 18px);
+      line-height: .86;
+      letter-spacing: -0.045em;
+      white-space: pre;
+      transform-origin: left top;
+    }
+
+    .ascii-subtitle {
+      margin-top: clamp(10px, 1vw, 14px);
+      color: rgba(137, 220, 227, .92);
+      font-family: var(--mono);
+      font-size: clamp(9px, .9vw, 13px);
+      letter-spacing: clamp(.22em, .52vw, .56em);
+      text-align: center;
+      font-weight: 900;
+    }
+
+    .hero-body {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(330px, .95fr);
+      gap: clamp(26px, 4vw, 62px);
+      align-items: center;
+    }
+
+    .hero-copy {
+      font-size: clamp(26px, 3.1vw, 48px);
+      letter-spacing: -0.045em;
+      line-height: 1.08;
+      font-weight: 950;
+      max-width: 820px;
+    }
+
+    .hero-explain {
+      color: var(--muted);
+      font-size: clamp(16px, 1.35vw, 20px);
+      max-width: 640px;
+      margin-top: 18px;
+    }
+
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 24px; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 19px;
+      border: 2px solid var(--line);
+      border-radius: 999px;
+      font-weight: 900;
+      transition: transform .18s ease, box-shadow .18s ease;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--line); }
+    .btn.primary { background: var(--green); color: white; box-shadow: 3px 3px 0 var(--line); }
+    .btn.secondary { background: rgba(255, 253, 248, 0.92); color: var(--ink); box-shadow: 3px 3px 0 var(--line); }
+
+    .hero-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .stack-row {
+      border: 2px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.46);
+      padding: 14px 15px;
+      display: grid;
+      grid-template-columns: 54px 1fr;
+      gap: 14px;
+      align-items: center;
+      box-shadow: 4px 4px 0 var(--line);
+    }
+
+    .stack-index {
+      width: 40px;
+      height: 40px;
+      border: 2px solid var(--line);
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: var(--green-soft);
+      font-family: var(--mono);
+      font-weight: 950;
+      font-size: 12px;
+    }
+
+    .stack-row:nth-child(2) .stack-index { background: var(--orange-soft); }
+    .stack-row:nth-child(3) .stack-index { background: var(--blue-soft); }
+
+    .stack-row strong {
+      display: block;
+      font-size: 17px;
+      letter-spacing: -.03em;
+    }
+    .stack-row span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .section {
+      padding: 88px 0;
+      border-top: 1px solid rgba(20, 20, 20, 0.08);
+      background: linear-gradient(to bottom, rgba(251,250,246,0.42), rgba(251,250,246,0.84));
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: .92fr 1.08fr;
+      gap: 30px;
+      align-items: end;
+      margin-bottom: 36px;
+    }
+
+    .section-kicker {
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      font-size: 12px;
+      font-weight: 950;
+      color: var(--green);
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: clamp(34px, 4.2vw, 58px);
+      line-height: 1.06;
+      letter-spacing: -.045em;
+      text-wrap: balance;
+    }
+    .section-text { font-size: 19px; color: var(--muted); max-width: 740px; }
+
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .card {
+      border: 2px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 253, 248, 0.9);
+      backdrop-filter: blur(16px);
+      padding: 22px;
+      box-shadow: 5px 5px 0 var(--line);
+      min-height: 210px;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .card:hover { transform: translate(-3px, -3px) rotate(-.5deg); box-shadow: 9px 9px 0 var(--line); }
+    .card:nth-child(even):hover { transform: translate(-3px, -3px) rotate(.5deg); }
+    .card-index {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--line);
+      border-radius: 16px;
+      background: var(--green-soft);
+      box-shadow: 3px 3px 0 var(--line);
+      font-size: 14px;
+      font-weight: 950;
+      margin-bottom: 18px;
+      letter-spacing: -0.02em;
+    }
+    .card:nth-child(2) .card-index, .card:nth-child(5) .card-index { background: var(--orange-soft); }
+    .card:nth-child(3) .card-index, .card:nth-child(6) .card-index { background: var(--blue-soft); }
+    .card h3 { font-size: 22px; letter-spacing: -.035em; margin-bottom: 10px; }
+    .card p { color: var(--muted); }
+
+    .agent-layout { display: grid; grid-template-columns: 1fr 1.05fr; gap: 22px; align-items: stretch; }
+    .agent-list { display: grid; gap: 12px; }
+    .agent-item {
+      width: 100%;
+      text-align: left;
+      border: 2px solid var(--line);
+      border-radius: 20px;
+      background: rgba(255, 253, 248, 0.9);
+      backdrop-filter: blur(14px);
+      padding: 18px;
+      box-shadow: 4px 4px 0 var(--line);
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    .agent-item:hover, .agent-item.active {
+      transform: translate(-3px, -3px);
+      box-shadow: 8px 8px 0 var(--line);
+      background: var(--green-soft);
+    }
+    .agent-code {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 48px;
+      height: 30px;
+      border: 2px solid var(--line);
+      border-radius: 999px;
+      background: var(--paper-solid);
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 950;
+      margin-bottom: 12px;
+    }
+    .agent-item h3 { font-size: 22px; letter-spacing: -.04em; margin-bottom: 6px; }
+    .agent-item p { color: var(--muted); }
+
+    .agent-detail {
+      border: 2px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: rgba(255, 253, 248, 0.9);
+      backdrop-filter: blur(16px);
+      box-shadow: 8px 8px 0 var(--line);
+      padding: 28px;
+      min-height: 100%;
+      position: sticky;
+      top: 96px;
+    }
+    .agent-detail-label {
+      display: inline-flex;
+      border: 2px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 11px;
+      background: var(--yellow);
+      box-shadow: 3px 3px 0 var(--line);
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 950;
+      margin-bottom: 20px;
+    }
+    .agent-detail h3 {
+      font-size: clamp(34px, 4vw, 56px);
+      line-height: .95;
+      letter-spacing: -.07em;
+      margin-bottom: 16px;
+    }
+    .agent-detail p { color: var(--muted); font-size: 18px; margin-bottom: 22px; }
+    .agent-meta { display: grid; gap: 12px; }
+    .agent-meta-row {
+      border: 2px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255,255,255,.42);
+      padding: 14px;
+    }
+    .agent-meta-row strong {
+      display: block;
+      font-size: 13px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .demo-shell { display: grid; grid-template-columns: 1.05fr .95fr; gap: 20px; align-items: stretch; }
+    .demo-terminal {
+      border: 2px solid var(--line);
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 8px 8px 0 var(--line);
+      background: #222a36;
+      color: #d8dee9;
+      font-family: var(--mono);
+    }
+    .demo-terminal-top {
+      height: 48px;
+      border-bottom: 2px solid #000;
+      background: #242424;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+    }
+    .dots { display: flex; gap: 8px; }
+    .dot { width: 12px; height: 12px; border-radius: 999px; border: 1.5px solid #000; }
+    .dot.red { background: #ff7b7b; }
+    .dot.yellow { background: #f4d35e; }
+    .dot.green { background: #80d39b; }
+    .terminal-title { color: #aaa; font-family: var(--mono); font-size: 12px; }
+
+    .demo-terminal-body {
+      position: relative;
+      padding: 0;
+      min-height: 560px;
+      background: #222a36;
+      color: #d8dee9;
+      font-family: var(--mono);
+      font-size: 13px;
+      overflow: hidden;
+    }
+    .cli-screen { padding: 22px 22px 52px; min-height: 560px; }
+    .demo-line {
+      opacity: 0;
+      transform: translateY(8px);
+      margin: 9px 0;
+      white-space: normal;
+    }
+    .demo-line.show {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity .28s ease, transform .28s ease;
+    }
+
+    .prompt { color: #7ee787; font-weight: 900; }
+    .dim, .cli-muted { color: #8b949e; }
+    .ok, .cli-green { color: #7ee787; font-weight: 700; }
+    .warn, .cli-yellow { color: #f2cc60; font-weight: 700; }
+    .blue { color: #93c5fd; }
+    .line { margin: 6px 0; }
+    .cli-text { color: #d8dee9; }
+    .cli-cyan { color: #8be9fd; font-weight: 700; }
+    .cli-red { color: #ff7b72; font-weight: 700; }
+    .cli-purple { color: #d2a8ff; font-weight: 700; }
+
+    .cli-path { color: #f2cc60; font-weight: 800; margin-top: 4px; }
+    .cli-help { margin-top: 18px; color: #8b949e; }
+    .cli-ready-card {
+      width: min(520px, 100%);
+      border: 1.5px solid #7dd3fc;
+      border-radius: 3px;
+      padding: 12px 14px;
+      margin: 12px 0 18px;
+      background: rgba(15, 23, 42, 0.20);
+    }
+    .cli-ready-title {
+      color: #8be9fd;
+      text-align: center;
+      font-weight: 900;
+      margin-bottom: 4px;
+    }
+    .cli-review-card {
+      border: 1.5px solid #f2cc60;
+      border-radius: 4px;
+      padding: 14px;
+      margin: 14px 0;
+      background: rgba(242, 204, 96, 0.035);
+    }
+    .cli-review-title {
+      color: #f2cc60;
+      text-align: center;
+      font-weight: 900;
+      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(242, 204, 96, 0.35);
+      padding-bottom: 6px;
+    }
+    .cli-review-grid {
+      display: grid;
+      grid-template-columns: 105px 1fr;
+      gap: 8px 12px;
+      align-items: start;
+    }
+    .cli-review-grid pre {
+      margin: 0;
+      color: #8b949e;
+      white-space: pre-wrap;
+      font-family: var(--mono);
+      line-height: 1.55;
+    }
+    .cli-choices { display: grid; gap: 4px; margin-top: 14px; }
+    .cli-statusbar {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 28px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1.15fr;
+      align-items: center;
+      background: #e5e7eb;
+      color: #1f2937;
+      font-family: var(--mono);
+      font-size: 12px;
+      border-top: 1px solid #cbd5e1;
+    }
+    .cli-statusbar span {
+      padding: 0 12px;
+      border-right: 1px solid #cbd5e1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .cli-statusbar span:last-child {
+      border-right: 0;
+      background: #bfdbfe;
+      color: #0f172a;
+      font-weight: 800;
+    }
+    .cli-spinner {
+      display: inline-block;
+      color: #8be9fd;
+      width: 1.2em;
+      margin-right: 6px;
+      animation: frameSpin .8s steps(8) infinite;
+    }
+    .cli-spinner::before { content: "⣾"; }
+    @keyframes frameSpin {
+      0% { content: "⣾"; }
+      12.5% { content: "⣽"; }
+      25% { content: "⣻"; }
+      37.5% { content: "⢿"; }
+      50% { content: "⡿"; }
+      62.5% { content: "⣟"; }
+      75% { content: "⣯"; }
+      87.5% { content: "⣷"; }
+      100% { content: "⣾"; }
+    }
+    .cli-spinner {
+      animation-name: none;
+    }
+    .cli-spinner::before {
+      animation: spinnerFrames .8s steps(8) infinite;
+    }
+    @keyframes spinnerFrames {
+      0% { content: "⣾"; }
+      12.5% { content: "⣽"; }
+      25% { content: "⣻"; }
+      37.5% { content: "⢿"; }
+      50% { content: "⡿"; }
+      62.5% { content: "⣟"; }
+      75% { content: "⣯"; }
+      87.5% { content: "⣷"; }
+      100% { content: "⣾"; }
+    }
+    .cli-cursor {
+      display: inline-block;
+      width: 8px;
+      height: 16px;
+      background: #d8dee9;
+      vertical-align: -3px;
+      margin-left: 4px;
+      animation: cliBlink 1s steps(1) infinite;
+    }
+    @keyframes cliBlink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+
+    .demo-output {
+      margin-top: 16px;
+      border: 1.5px solid rgba(134, 239, 172, .58);
+      background: rgba(134, 239, 172, .08);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .demo-map {
+      border: 2px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: rgba(255, 253, 248, 0.9);
+      backdrop-filter: blur(16px);
+      box-shadow: 8px 8px 0 var(--line);
+      padding: 24px;
+    }
+    .demo-flow { display: grid; gap: 12px; margin-top: 18px; }
+    .flow-step {
+      border: 2px solid var(--line);
+      border-radius: 18px;
+      padding: 15px;
+      background: rgba(255,255,255,.46);
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      gap: 14px;
+      align-items: center;
+      opacity: .48;
+      transform: translateX(0);
+      transition: opacity .28s ease, transform .28s ease, background .28s ease;
+    }
+    .flow-step.active { opacity: 1; transform: translateX(-4px); background: var(--green-soft); }
+    .flow-index {
+      width: 42px;
+      height: 42px;
+      border: 2px solid var(--line);
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 950;
+      background: var(--paper-solid);
+      box-shadow: 2px 2px 0 var(--line);
+    }
+    .flow-step h3 { font-size: 17px; letter-spacing: -.03em; margin-bottom: 2px; }
+    .flow-step p { color: var(--muted); font-size: 14px; }
+
+    .replay-button {
+      margin-top: 18px;
+      border: 2px solid var(--line);
+      border-radius: 999px;
+      padding: 11px 14px;
+      background: var(--paper-solid);
+      box-shadow: 3px 3px 0 var(--line);
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .replay-button:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--line); }
+
+    .architecture {
+      border: 2px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: rgba(255, 253, 248, 0.9);
+      backdrop-filter: blur(16px);
+      box-shadow: 8px 8px 0 var(--line);
+      overflow: hidden;
+    }
+    .arch-row { display: grid; grid-template-columns: 240px 1fr; border-bottom: 2px solid var(--line); }
+    .arch-row:last-child { border-bottom: 0; }
+    .arch-label { padding: 22px; font-weight: 950; background: rgba(223, 234, 220, 0.9); border-right: 2px solid var(--line); }
+    .arch-content { padding: 22px; color: var(--muted); }
+
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .big-panel {
+      border: 2px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: rgba(255, 253, 248, 0.9);
+      backdrop-filter: blur(16px);
+      padding: 28px;
+      box-shadow: 8px 8px 0 var(--line);
+    }
+    .big-panel h3 { font-size: 30px; letter-spacing: -.05em; margin-bottom: 12px; }
+    .big-panel p { color: var(--muted); margin-bottom: 18px; }
+
+    .code {
+      border: 2px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      background: #161616;
+      color: #f6f1e7;
+      font-family: var(--mono);
+      font-size: 13px;
+      overflow-x: auto;
+      box-shadow: 4px 4px 0 var(--line);
+      white-space: pre;
+    }
+
+    .roadmap { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .roadmap-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 17px;
+      border: 2px solid var(--line);
+      border-radius: 20px;
+      background: rgba(255, 253, 248, 0.9);
+      backdrop-filter: blur(16px);
+      box-shadow: 4px 4px 0 var(--line);
+      color: var(--muted);
+    }
+    .mark {
+      width: 26px;
+      height: 26px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border: 2px solid var(--line);
+      border-radius: 9px;
+      background: var(--green-soft);
+      color: var(--green);
+      font-weight: 950;
+      font-size: 12px;
+    }
+    .mark.todo { background: var(--blue-soft); color: #426b94; }
+
+    .cta {
+      text-align: center;
+      border: 2px solid var(--line);
+      border-radius: 40px;
+      padding: 54px 26px;
+      background: rgba(223, 234, 220, 0.9);
+      backdrop-filter: blur(16px);
+      box-shadow: 10px 10px 0 var(--line);
+    }
+    .cta h2 { margin-bottom: 16px; }
+    .cta p { color: var(--muted); max-width: 760px; margin: 0 auto 26px; font-size: 19px; }
+
+    footer {
+      padding: 36px 0 60px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      background: rgba(251,250,246,0.74);
+    }
+
+    [data-lang="zh"] { display: none; }
+    body.zh [data-lang="en"] { display: none; }
+    body.zh [data-lang="zh"] { display: inline; }
+    body.zh p[data-lang="zh"],
+    body.zh div[data-lang="zh"],
+    body.zh section[data-lang="zh"],
+    body.zh h1[data-lang="zh"],
+    body.zh h2[data-lang="zh"],
+    body.zh h3[data-lang="zh"],
+    body.zh span[data-lang="zh"],
+    body.zh a[data-lang="zh"] { display: block; }
+
+    body.zh .nav-links span[data-lang="zh"],
+    body.zh .btn span[data-lang="zh"],
+    body.zh .mini-label span[data-lang="zh"],
+    body.zh .badge[data-lang="zh"] { display: inline; }
+
+    @media (prefers-reduced-motion: reduce) {
+      #dna-bg { display: none; }
+      * { scroll-behavior: auto !important; }
+      .demo-line { opacity: 1; transform: none; }
+      .flow-step { opacity: 1; }
+      .cli-spinner::before, .cli-cursor { animation: none; }
+    }
+
+    @media (max-width: 1100px) {
+      .hero-body { grid-template-columns: 1fr; }
+      .nav-links { gap: 14px; font-size: 13px; }
+      .github-pill { display: none; }
+    }
+
+    @media (max-width: 960px) {
+      .nav-links { display: none; }
+      .hero { padding-top: 48px; }
+      .section-head, .split, .agent-layout, .demo-shell { grid-template-columns: 1fr; }
+      .cards, .roadmap { grid-template-columns: 1fr; }
+      .agent-detail { position: static; }
+      .arch-row { grid-template-columns: 1fr; }
+      .arch-label { border-right: 0; border-bottom: 2px solid var(--line); }
+      .hero-topline { align-items: flex-start; flex-direction: column; }
+    }
+
+    @media (max-width: 720px) {
+      .container, .narrow { width: min(100% - 24px, 1480px); }
+      .hero-panel { border-radius: 28px; padding: 18px; }
+      .ascii-wrap { border-radius: 18px; }
+      .ascii-logo { font-size: clamp(6.5px, 1.8vw, 10.5px); }
+      .ascii-subtitle { letter-spacing: .22em; }
+      .cli-statusbar { grid-template-columns: 1fr; height: auto; position: static; }
+      .cli-statusbar span { padding: 6px 12px; border-right: 0; border-bottom: 1px solid #cbd5e1; }
+      .cli-screen { padding-bottom: 22px; }
+      .cli-review-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
+
 <body>
-  <canvas id="dna-bg" aria-hidden="true"></canvas><div class="soft-light"></div><div class="grain"></div>
+  <canvas id="dna-bg" aria-hidden="true"></canvas>
+  <div class="soft-light"></div>
+  <div class="grain"></div>
+
   <div class="page">
-    <nav class="nav"><div class="container nav-inner"><a class="brand" href="#top"><span class="brand-mark">H</span><span>Helix-Swarm</span></a><div class="nav-links"><a href="#meaning"><span data-lang="en">Meaning</span><span data-lang="zh">命名</span></a><a href="#features"><span data-lang="en">Features</span><span data-lang="zh">能力</span></a><a href="#agents"><span data-lang="en">Agents</span><span data-lang="zh">Agent</span></a><a href="#demo"><span data-lang="en">Demo</span><span data-lang="zh">演示</span></a><a href="#architecture"><span data-lang="en">Architecture</span><span data-lang="zh">架构</span></a><a href="#install"><span data-lang="en">Install</span><span data-lang="zh">安装</span></a><a href="#roadmap"><span data-lang="en">Roadmap</span><span data-lang="zh">路线图</span></a><a href="https://github.com/Yule-Cai/Helix-Swarm" target="_blank" rel="noreferrer">GitHub</a></div><div class="lang"><button id="btn-en" class="active" onclick="setLang('en')">EN</button><button id="btn-zh" onclick="setLang('zh')">中文</button></div></div></nav>
-    <header id="top" class="hero"><div class="container hero-grid"><div><div class="mini-label"><span class="mini-dot"></span><span data-lang="en">Double-helix control for agent swarms</span><span data-lang="zh">面向 Agent Swarm 的双螺旋控制结构</span></div><h1 data-lang="en">A swarm that acts. A helix that keeps it under control.</h1><h1 data-lang="zh">Swarm 负责行动，Helix 负责控制。</h1><p class="hero-copy" data-lang="en">Helix-Swarm is a permission-first CLI agent framework built around a double-helix idea: one strand pushes agent work forward, while the other checks permission, evidence, and traceability.</p><p class="hero-copy" data-lang="zh">Helix-Swarm 是一个权限优先的 CLI Agent 框架。它的核心是双螺旋结构：一条链推动 Agent 工作，另一条链检查权限、证据和可追踪性。</p><div class="hero-actions"><a class="btn primary" href="https://github.com/Yule-Cai/Helix-Swarm" target="_blank" rel="noreferrer"><span data-lang="en">Open GitHub</span><span data-lang="zh">打开 GitHub</span></a><a class="btn secondary" href="#demo"><span data-lang="en">Watch CLI flow</span><span data-lang="zh">查看 CLI 演示</span></a></div><div class="badges"><span class="badge" data-lang="en">Double Helix</span><span class="badge" data-lang="zh">双螺旋</span><span class="badge">Agent Swarm</span><span class="badge" data-lang="en">Permission-first</span><span class="badge" data-lang="zh">权限优先</span><span class="badge">Evidence Card</span><span class="badge" data-lang="en">Traceable Actions</span><span class="badge" data-lang="zh">可追踪动作</span></div></div><div class="helix-card"><div class="helix-title" data-lang="en">The Helix Pattern</div><div class="helix-title" data-lang="zh">双螺旋模式</div><p class="helix-sub" data-lang="en">Agency and control are not separate modules. They twist together at every risky step.</p><p class="helix-sub" data-lang="zh">能力和控制不是分离模块，而是在每个高风险步骤中交织。</p><div class="helix-visual"><div class="strand left"></div><div class="strand right"></div><div class="rung"></div><div class="rung"></div><div class="rung"></div><div class="rung"></div><div class="rung"></div><div class="helix-node node-a">Agency</div><div class="helix-node node-b">Permission</div><div class="helix-node node-c">Evidence</div></div><div class="terminal-mini"><div data-lang="en"><div class="line"><span class="prompt">❯</span> Review project. Read-only.</div><div class="line ok">Evidence Card 1</div><div class="line dim">File: core/permission_manager.py</div><div class="line dim">Symbol: _is_in_workspace()</div><div class="line warn">Risk: path boundary check</div></div><div data-lang="zh"><div class="line"><span class="prompt">❯</span> 审查项目，只读模式。</div><div class="line ok">Evidence Card 1</div><div class="line dim">文件：core/permission_manager.py</div><div class="line dim">符号：_is_in_workspace()</div><div class="line warn">风险：路径边界检查</div></div></div></div></div></header>
+    <nav class="nav">
+      <div class="nav-inner">
+        <a class="brand" href="#top">
+          <span class="brand-mark">H</span>
+          <span>Helix-Swarm</span>
+        </a>
+
+        <div class="nav-links">
+          <a href="#meaning"><span data-lang="en">Meaning</span><span data-lang="zh">命名</span></a>
+          <a href="#features"><span data-lang="en">Features</span><span data-lang="zh">能力</span></a>
+          <a href="#agents"><span data-lang="en">Agents</span><span data-lang="zh">Agent</span></a>
+          <a href="#demo"><span data-lang="en">Demo</span><span data-lang="zh">演示</span></a>
+          <a href="#architecture"><span data-lang="en">Architecture</span><span data-lang="zh">架构</span></a>
+          <a href="#install"><span data-lang="en">Install</span><span data-lang="zh">安装</span></a>
+          <a href="#roadmap"><span data-lang="en">Roadmap</span><span data-lang="zh">路线图</span></a>
+        </div>
+
+        <div class="nav-right">
+          <a class="github-pill" href="https://github.com/Yule-Cai/Helix-Swarm" target="_blank" rel="noreferrer">GitHub</a>
+          <div class="lang">
+            <button id="btn-en" class="active" onclick="setLang('en')">EN</button>
+            <button id="btn-zh" onclick="setLang('zh')">中文</button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <header id="top" class="hero">
+      <div class="container">
+        <div class="hero-panel">
+          <div class="hero-topline">
+            <div class="mini-label">
+              <span class="mini-dot"></span>
+              <span data-lang="en">Double-helix control for agent swarms</span>
+              <span data-lang="zh">面向 Agent Swarm 的双螺旋控制结构</span>
+            </div>
+            <div class="hero-version">CLI CONTROL LAYER · EVIDENCE CARD · SKILL-AWARE</div>
+          </div>
+
+          <div class="ascii-wrap" aria-label="Helix-Swarm ASCII logo">
+<pre class="ascii-logo">██╗  ██╗███████╗██╗     ██╗██╗  ██╗    ███████╗██╗    ██╗ █████╗ ██████╗ ███╗   ███╗
+██║  ██║██╔════╝██║     ██║╚██╗██╔╝    ██╔════╝██║    ██║██╔══██╗██╔══██╗████╗ ████║
+███████║█████╗  ██║     ██║ ╚███╔╝     ███████╗██║ █╗ ██║███████║██████╔╝██╔████╔██║
+██╔══██║██╔══╝  ██║     ██║ ██╔██╗     ╚════██║██║███╗██║██╔══██║██╔══██╗██║╚██╔╝██║
+██║  ██║███████╗███████╗██║██╔╝ ██╗    ███████║╚███╔███╔╝██║  ██║██║  ██║██║ ╚═╝ ██║
+╚═╝  ╚═╝╚══════╝╚══════╝╚═╝╚═╝  ╚═╝    ╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝</pre>
+            <div class="ascii-subtitle">AUTONOMOUS MULTI-AGENT SWARM</div>
+          </div>
+
+          <div class="hero-body">
+            <div>
+              <div class="hero-copy" data-lang="en">A swarm that acts. A helix that keeps it under control.</div>
+              <div class="hero-copy" data-lang="zh">Swarm 负责行动，Helix 负责控制。</div>
+
+              <p class="hero-explain" data-lang="en">
+                Helix-Swarm is a permission-first CLI agent framework. One strand pushes agent work forward;
+                the other checks permission, evidence, and traceability before risky actions happen.
+              </p>
+
+              <p class="hero-explain" data-lang="zh">
+                Helix-Swarm 是一个权限优先的 CLI Agent 框架。一条链推动 Agent 工作；
+                另一条链在高风险动作发生前检查权限、证据和可追踪性。
+              </p>
+
+              <div class="hero-actions">
+                <a class="btn primary" href="https://github.com/Yule-Cai/Helix-Swarm" target="_blank" rel="noreferrer">
+                  <span data-lang="en">Open GitHub</span><span data-lang="zh">打开 GitHub</span>
+                </a>
+                <a class="btn secondary" href="#demo">
+                  <span data-lang="en">Watch CLI flow</span><span data-lang="zh">查看 CLI 演示</span>
+                </a>
+              </div>
+            </div>
+
+            <div class="hero-stack">
+              <div class="stack-row">
+                <div class="stack-index">01</div>
+                <div><strong>Agency Strand</strong><span data-lang="en">Route, delegate, call tools, execute.</span><span data-lang="zh">路由、委派、调用工具、执行。</span></div>
+              </div>
+              <div class="stack-row">
+                <div class="stack-index">02</div>
+                <div><strong>Control Strand</strong><span data-lang="en">Check permission, evidence, approval, audit.</span><span data-lang="zh">检查权限、证据、确认和审计。</span></div>
+              </div>
+              <div class="stack-row">
+                <div class="stack-index">03</div>
+                <div><strong>Agent Swarm</strong><span data-lang="en">Leo coordinates specialist agents.</span><span data-lang="zh">Leo 协调多个专家 Agent。</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
 
     <main>
-      <section id="meaning" class="section"><div class="container"><div class="section-head"><div><div class="section-kicker" data-lang="en">Meaning</div><div class="section-kicker" data-lang="zh">命名含义</div><h2 data-lang="en">Helix means control. Swarm means collaboration.</h2><h2 data-lang="zh">Helix 是控制，Swarm 是协作。</h2></div><p class="section-text" data-lang="en">The name comes from the original vision: one agent plans the whole task, multiple agents work together, and a second strand keeps permissions and evidence attached to every action.</p><p class="section-text" data-lang="zh">这个名字来自最初的设想：一个 Agent 进行整体规划，多个 Agent 协同执行，同时另一条链把权限和证据绑定到每个动作上。</p></div><div class="cards"><article class="card"><div class="card-index">01</div><h3 data-lang="en">Double-helix architecture</h3><h3 data-lang="zh">双螺旋架构</h3><p data-lang="en">One strand is agency: routing, agents, tools, and execution. The other is control: permission, evidence, audit, and approval.</p><p data-lang="zh">一条链是能力：路由、Agent、工具和执行。另一条链是控制：权限、证据、审计和确认。</p></article><article class="card"><div class="card-index">02</div><h3 data-lang="en">Swarm-style delegation</h3><h3 data-lang="zh">Swarm 式委派</h3><p data-lang="en">Leo supervises specialist agents such as File Agent, Search Agent, Reviewer, and Computer Agent.</p><p data-lang="zh">Leo 监督 File Agent、Search Agent、Reviewer 和 Computer Agent 等专家 Agent。</p></article><article class="card"><div class="card-index">03</div><h3 data-lang="en">Control at every crossing</h3><h3 data-lang="zh">每个交叉点都有控制</h3><p data-lang="en">When an action becomes risky, the control strand crosses the agency strand and asks for approval.</p><p data-lang="zh">当动作变得高风险时，控制链会穿过能力链并请求用户确认。</p></article></div></div></section>
-      <section id="features" class="section"><div class="container"><div class="section-head"><div><div class="section-kicker" data-lang="en">Features</div><div class="section-kicker" data-lang="zh">核心能力</div><h2 data-lang="en">Designed around control, not blind autonomy.</h2><h2 data-lang="zh">围绕可控性设计，而不是盲目自动化。</h2></div><p class="section-text" data-lang="en">Helix-Swarm focuses on the agent behaviors that matter most: explain actions, ask before risk, show evidence, and keep work traceable.</p><p class="section-text" data-lang="zh">Helix-Swarm 聚焦 Agent 最关键的行为：解释动作、高风险前确认、展示证据、保持可追踪。</p></div><div class="cards"><article class="card"><div class="card-index">A1</div><h3 data-lang="en">Permission-first execution</h3><h3 data-lang="zh">权限优先执行</h3><p data-lang="en">Risky operations are reviewed before they run. The agent does not silently execute high-impact actions.</p><p data-lang="zh">高风险操作执行前先审查，Agent 不会静默执行高影响动作。</p></article><article class="card"><div class="card-index">A2</div><h3 data-lang="en">Human-in-the-loop approval</h3><h3 data-lang="zh">人在回路确认</h3><p data-lang="en">Approve, deny, or block tool calls. The user keeps final authority over sensitive steps.</p><p data-lang="zh">用户可以确认、拒绝或禁止工具调用，保留对敏感步骤的最终决定权。</p></article><article class="card"><div class="card-index">A3</div><h3 data-lang="en">Evidence Card review</h3><h3 data-lang="zh">Evidence Card 审查</h3><p data-lang="en">Review findings must include file, symbol, evidence, risk, consequence, and suggested fix.</p><p data-lang="zh">审查发现必须包含文件、函数、证据、风险、后果和修复建议。</p></article><article class="card"><div class="card-index">B1</div><h3 data-lang="en">Skill-aware workflows</h3><h3 data-lang="zh">技能感知工作流</h3><p data-lang="en">Search, compare, inspect, and then decide. Skills are not blindly installed or invoked.</p><p data-lang="zh">先搜索、比较、检查，再决定是否安装或调用 Skill。</p></article><article class="card"><div class="card-index">B2</div><h3 data-lang="en">Terminal control layer</h3><h3 data-lang="zh">终端控制层</h3><p data-lang="en">A CLI-first interface for chatting, reviewing tools, changing settings, and supervising actions.</p><p data-lang="zh">CLI 优先，用于聊天、审查工具、修改配置和监督动作。</p></article><article class="card"><div class="card-index">B3</div><h3 data-lang="en">Traceable agent actions</h3><h3 data-lang="zh">可追踪 Agent 行为</h3><p data-lang="en">Tool calls, permission checks, and review outputs are visible instead of hidden inside the model.</p><p data-lang="zh">工具调用、权限检查和审查输出都保持可见，而不是隐藏在模型内部。</p></article></div></div></section>
+      <section id="meaning" class="section">
+        <div class="narrow">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker" data-lang="en">Meaning</div>
+              <div class="section-kicker" data-lang="zh">命名含义</div>
+              <h2 data-lang="en">Helix controls. Swarm collaborates.</h2>
+              <h2 data-lang="zh">Helix 负责控制，Swarm 负责协作。</h2>
+            </div>
+            <p class="section-text" data-lang="en">
+              The name comes from the original vision: one agent plans the whole task,
+              multiple agents work together, and a second strand keeps permissions and evidence attached to every action.
+            </p>
+            <p class="section-text" data-lang="zh">
+              这个名字来自最初的设想：一个 Agent 进行整体规划，多个 Agent 协同执行，
+              同时另一条链把权限和证据绑定到每个动作上。
+            </p>
+          </div>
 
-      <section id="agents" class="section"><div class="container"><div class="section-head"><div><div class="section-kicker">Agent Swarm</div><h2 data-lang="en">Built-in agents, each with a boundary.</h2><h2 data-lang="zh">内置 Agent，各自有明确边界。</h2></div><p class="section-text" data-lang="en">Helix-Swarm is not one giant agent. It is a small swarm coordinated by Leo, where every specialist has a clear role, input, output, and safety boundary.</p><p class="section-text" data-lang="zh">Helix-Swarm 不是一个巨大的单体 Agent。它是由 Leo 协调的小型 Swarm，每个专家 Agent 都有明确职责、输入、输出和安全边界。</p></div><div class="agent-layout"><div class="agent-list"><button class="agent-item active" data-agent="leo"><span class="agent-code">A0</span><h3>Leo Supervisor</h3><p data-lang="en">Plans the route, delegates work, and keeps the task coherent.</p><p data-lang="zh">负责规划路径、委派任务，并保持整体任务一致。</p></button><button class="agent-item" data-agent="file"><span class="agent-code">A1</span><h3>File Agent</h3><p data-lang="en">Reads local files and turns raw content into usable context.</p><p data-lang="zh">读取本地文件，并把原始内容整理成可用上下文。</p></button><button class="agent-item" data-agent="search"><span class="agent-code">A2</span><h3>Search Agent</h3><p data-lang="en">Looks up tools, skills, and project evidence before conclusions.</p><p data-lang="zh">在下结论前搜索工具、Skill 和项目证据。</p></button><button class="agent-item" data-agent="reviewer"><span class="agent-code">A3</span><h3>Reviewer</h3><p data-lang="en">Produces Evidence Cards instead of generic audit text.</p><p data-lang="zh">输出 Evidence Card，而不是泛泛而谈的审查文字。</p></button><button class="agent-item" data-agent="computer"><span class="agent-code">A4</span><h3>Computer Agent</h3><p data-lang="en">Handles terminal-facing actions after permission review.</p><p data-lang="zh">在权限审查后处理面向终端的动作。</p></button></div><aside class="agent-detail"><div class="agent-detail-label" id="agent-code">A0 / Supervisor</div><h3 id="agent-title">Leo Supervisor</h3><p id="agent-desc">Leo is the coordinator of the swarm.</p><div class="agent-meta"><div class="agent-meta-row"><strong id="agent-input-label">Input</strong><span id="agent-input"></span></div><div class="agent-meta-row"><strong id="agent-output-label">Output</strong><span id="agent-output"></span></div><div class="agent-meta-row"><strong id="agent-boundary-label">Boundary</strong><span id="agent-boundary"></span></div></div></aside></div></div></section>
+          <div class="cards">
+            <article class="card">
+              <div class="card-index">01</div>
+              <h3 data-lang="en">Double-helix architecture</h3>
+              <h3 data-lang="zh">双螺旋架构</h3>
+              <p data-lang="en">One strand is agency: routing, agents, tools, and execution. The other is control: permission, evidence, audit, and approval.</p>
+              <p data-lang="zh">一条链是能力：路由、Agent、工具和执行。另一条链是控制：权限、证据、审计和确认。</p>
+            </article>
+            <article class="card">
+              <div class="card-index">02</div>
+              <h3 data-lang="en">Swarm-style delegation</h3>
+              <h3 data-lang="zh">Swarm 式委派</h3>
+              <p data-lang="en">Leo supervises specialist agents such as File Agent, Search Agent, Reviewer, and Computer Agent.</p>
+              <p data-lang="zh">Leo 监督 File Agent、Search Agent、Reviewer 和 Computer Agent 等专家 Agent。</p>
+            </article>
+            <article class="card">
+              <div class="card-index">03</div>
+              <h3 data-lang="en">Control at every crossing</h3>
+              <h3 data-lang="zh">每个交叉点都有控制</h3>
+              <p data-lang="en">When an action becomes risky, the control strand crosses the agency strand and asks for approval.</p>
+              <p data-lang="zh">当动作变得高风险时，控制链会穿过能力链并请求用户确认。</p>
+            </article>
+          </div>
+        </div>
+      </section>
 
-      <section id="demo" class="section"><div class="container"><div class="section-head"><div><div class="section-kicker" data-lang="en">CLI Replay</div><div class="section-kicker" data-lang="zh">CLI 演示</div><h2 data-lang="en">Watch the real terminal rhythm.</h2><h2 data-lang="zh">看一次真实终端节奏。</h2></div><p class="section-text" data-lang="en">This replay mirrors the current Helix-Swarm CLI: loading tools, system-ready panel, thinking spinner, tool-call review, and traceable Evidence Card output.</p><p class="section-text" data-lang="zh">这个演示模拟当前 Helix-Swarm CLI：工具加载、SYSTEM READY 面板、思考转圈、工具调用审查，以及可追踪的 Evidence Card 输出。</p></div><div class="demo-shell" id="cli-demo"><div class="demo-terminal"><div class="demo-terminal-top"><div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div><div class="terminal-title">helix-swarm replay</div></div><div class="demo-terminal-body"><div class="cli-screen"><div class="demo-line" data-step="1"><span class="cli-cyan">🔄 Loading tools and skills...</span></div><div class="demo-line" data-step="2"><span class="cli-green">✅ Markdown skill library fully reloaded! 4 advanced SOP skills mounted.</span></div><div class="demo-line" data-step="3"><span class="cli-muted">📦 Loaded tools:</span><br><span class="cli-green">general:</span><span class="cli-text"> grep_code, glob_files, search_symbols, read_file, write_file (+29 more)</span></div><div class="demo-line" data-step="4"><div class="cli-ready-card"><div class="cli-ready-title">SYSTEM READY</div><div><span class="cli-cyan">🌐 Global Mode Active!</span><span class="cli-text"> Controlling directory:</span></div><div class="cli-path">/Users/yulecai/Desktop/Helix-Swarm</div><div class="cli-help">Type /help for commands | Type exit to quit</div></div></div><div class="demo-line" data-step="5"><span class="prompt">❯</span> <span data-lang="en">Review the project and find 3 concrete risks. Read-only.</span><span data-lang="zh">审查项目，找出 3 个具体风险。只读。</span></div><div class="demo-line" data-step="6"><span class="cli-muted" data-lang="en">📋 Task type: chat</span><span class="cli-muted" data-lang="zh">📋 任务类型：chat</span><br><span class="cli-spinner"></span><span class="cli-muted" data-lang="en">AI is thinking... | ⚡ Tokens: 276,379 | 💰 Balance: ∞ (local compute)</span><span class="cli-muted" data-lang="zh">AI 正在思考中... | ⚡ Tokens: 276,379 | 💰 Balance: ∞ (local compute)</span></div><div class="demo-line" data-step="7"><span class="cli-yellow">⚡ [Leo] Executing tool: ReviewEvidence</span></div><div class="demo-line" data-step="8"><div class="cli-review-card"><div class="cli-review-title">🛡️ Tool Call Review</div><div class="cli-review-grid"><span>Tool:</span><strong>ReviewEvidence</strong><span>Risk level:</span><strong class="cli-yellow">medium</strong><span>Arguments:</span><pre>{
+      <section id="features" class="section">
+        <div class="narrow">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker" data-lang="en">Features</div>
+              <div class="section-kicker" data-lang="zh">核心能力</div>
+              <h2 data-lang="en">Controlled by design, not blind autonomy.</h2>
+              <h2 data-lang="zh">以可控性为核心，而不是盲目自动化。</h2>
+            </div>
+            <p class="section-text" data-lang="en">
+              Helix-Swarm focuses on the agent behaviors that matter most:
+              explain actions, ask before risk, show evidence, and keep work traceable.
+            </p>
+            <p class="section-text" data-lang="zh">
+              Helix-Swarm 聚焦 Agent 最关键的行为：解释动作、高风险前确认、展示证据、保持可追踪。
+            </p>
+          </div>
+
+          <div class="cards">
+            <article class="card"><div class="card-index">A1</div><h3 data-lang="en">Permission-first execution</h3><h3 data-lang="zh">权限优先执行</h3><p data-lang="en">Risky operations are reviewed before they run. The agent does not silently execute high-impact actions.</p><p data-lang="zh">高风险操作执行前先审查，Agent 不会静默执行高影响动作。</p></article>
+            <article class="card"><div class="card-index">A2</div><h3 data-lang="en">Human-in-the-loop approval</h3><h3 data-lang="zh">人在回路确认</h3><p data-lang="en">Approve, deny, or block tool calls. The user keeps final authority over sensitive steps.</p><p data-lang="zh">用户可以确认、拒绝或禁止工具调用，保留对敏感步骤的最终决定权。</p></article>
+            <article class="card"><div class="card-index">A3</div><h3 data-lang="en">Evidence Card review</h3><h3 data-lang="zh">Evidence Card 审查</h3><p data-lang="en">Review findings must include file, symbol, evidence, risk, consequence, and suggested fix.</p><p data-lang="zh">审查发现必须包含文件、函数、证据、风险、后果和修复建议。</p></article>
+            <article class="card"><div class="card-index">B1</div><h3 data-lang="en">Skill-aware workflows</h3><h3 data-lang="zh">技能感知工作流</h3><p data-lang="en">Search, compare, inspect, and then decide. Skills are not blindly installed or invoked.</p><p data-lang="zh">先搜索、比较、检查，再决定是否安装或调用 Skill。</p></article>
+            <article class="card"><div class="card-index">B2</div><h3 data-lang="en">Terminal control layer</h3><h3 data-lang="zh">终端控制层</h3><p data-lang="en">A CLI-first interface for chatting, reviewing tools, changing settings, and supervising actions.</p><p data-lang="zh">CLI 优先，用于聊天、审查工具、修改配置和监督动作。</p></article>
+            <article class="card"><div class="card-index">B3</div><h3 data-lang="en">Traceable agent actions</h3><h3 data-lang="zh">可追踪 Agent 行为</h3><p data-lang="en">Tool calls, permission checks, and review outputs are visible instead of hidden inside the model.</p><p data-lang="zh">工具调用、权限检查和审查输出都保持可见，而不是隐藏在模型内部。</p></article>
+          </div>
+        </div>
+      </section>
+
+      <section id="agents" class="section">
+        <div class="narrow">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">Agent Swarm</div>
+              <h2 data-lang="en">Built-in agents with clear boundaries.</h2>
+              <h2 data-lang="zh">内置 Agent，边界清晰。</h2>
+            </div>
+            <p class="section-text" data-lang="en">
+              Helix-Swarm is not one giant agent. It is a small swarm coordinated by Leo,
+              where every specialist has a clear role, input, output, and safety boundary.
+            </p>
+            <p class="section-text" data-lang="zh">
+              Helix-Swarm 不是一个巨大的单体 Agent。它是由 Leo 协调的小型 Swarm，
+              每个专家 Agent 都有明确职责、输入、输出和安全边界。
+            </p>
+          </div>
+
+          <div class="agent-layout">
+            <div class="agent-list">
+              <button class="agent-item active" data-agent="leo"><span class="agent-code">A0</span><h3>Leo Supervisor</h3><p data-lang="en">Plans the route, delegates work, and keeps the task coherent.</p><p data-lang="zh">负责规划路径、委派任务，并保持整体任务一致。</p></button>
+              <button class="agent-item" data-agent="file"><span class="agent-code">A1</span><h3>File Agent</h3><p data-lang="en">Reads local files and turns raw content into usable context.</p><p data-lang="zh">读取本地文件，并把原始内容整理成可用上下文。</p></button>
+              <button class="agent-item" data-agent="search"><span class="agent-code">A2</span><h3>Search Agent</h3><p data-lang="en">Looks up tools, skills, and project evidence before conclusions.</p><p data-lang="zh">在下结论前搜索工具、Skill 和项目证据。</p></button>
+              <button class="agent-item" data-agent="reviewer"><span class="agent-code">A3</span><h3>Reviewer</h3><p data-lang="en">Produces Evidence Cards instead of generic audit text.</p><p data-lang="zh">输出 Evidence Card，而不是泛泛而谈的审查文字。</p></button>
+              <button class="agent-item" data-agent="computer"><span class="agent-code">A4</span><h3>Computer Agent</h3><p data-lang="en">Handles terminal-facing actions after permission review.</p><p data-lang="zh">在权限审查后处理面向终端的动作。</p></button>
+            </div>
+
+            <aside class="agent-detail">
+              <div class="agent-detail-label" id="agent-code">A0 / Supervisor</div>
+              <h3 id="agent-title">Leo Supervisor</h3>
+              <p id="agent-desc">Leo is the coordinator of the swarm.</p>
+              <div class="agent-meta">
+                <div class="agent-meta-row"><strong id="agent-input-label">Input</strong><span id="agent-input"></span></div>
+                <div class="agent-meta-row"><strong id="agent-output-label">Output</strong><span id="agent-output"></span></div>
+                <div class="agent-meta-row"><strong id="agent-boundary-label">Boundary</strong><span id="agent-boundary"></span></div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section id="demo" class="section">
+        <div class="narrow">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker" data-lang="en">CLI Replay</div>
+              <div class="section-kicker" data-lang="zh">CLI 演示</div>
+              <h2 data-lang="en">Watch the CLI flow.</h2>
+              <h2 data-lang="zh">看一次 CLI 流程。</h2>
+            </div>
+            <p class="section-text" data-lang="en">
+              This replay mirrors the current Helix-Swarm CLI: startup logo, loading tools, system-ready panel,
+              thinking spinner, tool-call review, and traceable Evidence Card output.
+            </p>
+            <p class="section-text" data-lang="zh">
+              这个演示模拟当前 Helix-Swarm CLI：启动艺术字、工具加载、SYSTEM READY 面板、思考动画、
+              工具调用审查，以及可追踪的 Evidence Card 输出。
+            </p>
+          </div>
+
+          <div class="demo-shell" id="cli-demo">
+            <div class="demo-terminal">
+              <div class="demo-terminal-top">
+                <div class="dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
+                <div class="terminal-title">helix-swarm replay</div>
+              </div>
+
+              <div class="demo-terminal-body">
+                <div class="cli-screen">
+                  <div class="demo-line" data-step="1"><span class="cli-cyan">Loading tools and skills...</span></div>
+                  <div class="demo-line" data-step="2"><span class="cli-green">Markdown skill library fully reloaded! 4 advanced SOP skills mounted.</span></div>
+                  <div class="demo-line" data-step="3"><span class="cli-muted">Loaded tools:</span><br /><span class="cli-green">general:</span><span class="cli-text"> grep_code, glob_files, search_symbols, read_file, write_file (+29 more)</span></div>
+
+                  <div class="demo-line" data-step="4">
+                    <div class="cli-ready-card">
+                      <div class="cli-ready-title">SYSTEM READY</div>
+                      <div><span class="cli-cyan">Global Mode Active!</span><span class="cli-text"> Controlling directory:</span></div>
+                      <div class="cli-path">/Users/yulecai/Desktop/Helix-Swarm</div>
+                      <div class="cli-help">Type /help for commands | Type exit to quit</div>
+                    </div>
+                  </div>
+
+                  <div class="demo-line" data-step="5">
+                    <span class="prompt">❯</span>
+                    <span data-lang="en">Review the project and find 3 concrete risks. Read-only.</span>
+                    <span data-lang="zh">审查项目，找出 3 个具体风险。只读。</span>
+                  </div>
+
+                  <div class="demo-line" data-step="6">
+                    <span class="cli-muted" data-lang="en">Task type: chat</span>
+                    <span class="cli-muted" data-lang="zh">任务类型：chat</span>
+                    <br />
+                    <span class="cli-spinner"></span>
+                    <span class="cli-muted" data-lang="en">AI is thinking... | Tokens: 276,379 | Balance: ∞ (local compute)</span>
+                    <span class="cli-muted" data-lang="zh">AI 正在思考中... | Tokens: 276,379 | Balance: ∞ (local compute)</span>
+                  </div>
+
+                  <div class="demo-line" data-step="7"><span class="cli-yellow">[Leo] Executing tool: ReviewEvidence</span></div>
+
+                  <div class="demo-line" data-step="8">
+                    <div class="cli-review-card">
+                      <div class="cli-review-title">Tool Call Review</div>
+                      <div class="cli-review-grid">
+                        <span>Tool:</span><strong>ReviewEvidence</strong>
+                        <span>Risk level:</span><strong class="cli-yellow">medium</strong>
+                        <span>Arguments:</span><pre>{
   "Category": "risk_analysis",
   "EvidenceCard": "P0",
   "Task": "Analyze project for 3 concrete risks using available tools and evidence."
-}</pre></div><div class="cli-choices"><span class="cli-green">Y = Approve</span><span class="cli-red">N = Deny this call</span><span class="cli-purple">B = Block this tool for this session</span></div></div></div><div class="demo-line" data-step="9"><span class="cli-text">Choose [Y/N/B], press Enter to deny by default:</span><span class="cli-cursor"></span></div><div class="demo-line demo-output" data-step="10"><div data-lang="en"><div class="cli-green">Evidence Card 1</div><div class="cli-muted">File: core/permission_manager.py</div><div class="cli-muted">Symbol: _is_in_workspace()</div><div class="cli-muted">Evidence: path boundary logic found in permission checks.</div><div class="cli-yellow">Suggested fix: strengthen path validation and symlink handling.</div></div><div data-lang="zh"><div class="cli-green">Evidence Card 1</div><div class="cli-muted">文件：core/permission_manager.py</div><div class="cli-muted">符号：_is_in_workspace()</div><div class="cli-muted">证据：权限检查中存在路径边界逻辑。</div><div class="cli-yellow">修复建议：增强路径校验和符号链接处理。</div></div></div></div><div class="cli-statusbar"><span>✦ Helix Swarm</span><span>⚡ Tokens: 276,379</span><span>💰 Balance: ∞ (local compute)</span><span>LOCAL: liquid/lfm2.5-1.2b</span></div></div></div><div class="demo-map"><div class="agent-detail-label" data-lang="en">Flow Map</div><div class="agent-detail-label" data-lang="zh">流程图</div><div class="demo-flow"><div class="flow-step" data-flow="1"><div class="flow-index">01</div><div><h3 data-lang="en">System ready</h3><h3 data-lang="zh">系统就绪</h3><p data-lang="en">Tools, skills, and session state are loaded.</p><p data-lang="zh">工具、技能和会话状态加载完成。</p></div></div><div class="flow-step" data-flow="2"><div class="flow-index">02</div><div><h3 data-lang="en">User request</h3><h3 data-lang="zh">用户请求</h3><p data-lang="en">The CLI receives a natural-language review task.</p><p data-lang="zh">CLI 接收自然语言审查任务。</p></div></div><div class="flow-step" data-flow="3"><div class="flow-index">03</div><div><h3 data-lang="en">Thinking state</h3><h3 data-lang="zh">思考状态</h3><p data-lang="en">A visible spinner shows the agent is working.</p><p data-lang="zh">转圈状态显示 Agent 正在工作。</p></div></div><div class="flow-step" data-flow="4"><div class="flow-index">04</div><div><h3 data-lang="en">Tool review</h3><h3 data-lang="zh">工具审查</h3><p data-lang="en">Risky or meaningful tool calls become visible.</p><p data-lang="zh">有风险或关键的工具调用会变得可见。</p></div></div><div class="flow-step" data-flow="5"><div class="flow-index">05</div><div><h3 data-lang="en">Traceable output</h3><h3 data-lang="zh">可追踪输出</h3><p data-lang="en">The final result includes evidence and next actions.</p><p data-lang="zh">最终结果包含证据和后续动作。</p></div></div></div><button class="replay-button" onclick="playCliDemo()"><span data-lang="en">Replay flow</span><span data-lang="zh">重新播放</span></button></div></div></div></section>
+}</pre>
+                      </div>
+                      <div class="cli-choices">
+                        <span class="cli-green">Y = Approve</span>
+                        <span class="cli-red">N = Deny this call</span>
+                        <span class="cli-purple">B = Block this tool for this session</span>
+                      </div>
+                    </div>
+                  </div>
 
-      <section id="architecture" class="section"><div class="container"><div class="section-head"><div><div class="section-kicker" data-lang="en">Architecture</div><div class="section-kicker" data-lang="zh">架构</div><h2 data-lang="en">Agency strand. Control strand. One traceable system.</h2><h2 data-lang="zh">能力链。控制链。一个可追踪系统。</h2></div><p class="section-text" data-lang="en">Leo supervises specialist agents. The registry discovers tools. The permission manager decides what needs approval.</p><p class="section-text" data-lang="zh">Leo 监督专家 Agent，注册表发现工具，权限管理器判断哪些动作需要确认。</p></div><div class="architecture"><div class="arch-row"><div class="arch-label">Agency Strand</div><div class="arch-content" data-lang="en">User intent, task routing, specialist agents, tool proposals, and execution.</div><div class="arch-content" data-lang="zh">用户意图、任务路由、专家 Agent、工具提议和执行。</div></div><div class="arch-row"><div class="arch-label">Control Strand</div><div class="arch-content" data-lang="en">Permission review, risk estimation, evidence checks, user approval, and audit logs.</div><div class="arch-content" data-lang="zh">权限审查、风险判断、证据检查、用户确认和审计日志。</div></div><div class="arch-row"><div class="arch-label">Swarm Layer</div><div class="arch-content" data-lang="en">File Agent, Search Agent, Reviewer, Computer Agent, Tool Registry, and SOP-style skills.</div><div class="arch-content" data-lang="zh">File Agent、Search Agent、Reviewer、Computer Agent、工具注册表和 SOP 风格技能。</div></div><div class="arch-row"><div class="arch-label">Trace Layer</div><div class="arch-content" data-lang="en">Visible tool calls, approval state, execution output, and evidence-based review cards.</div><div class="arch-content" data-lang="zh">可见工具调用、确认状态、执行输出和基于证据的审查卡片。</div></div></div></div></section>
+                  <div class="demo-line" data-step="9">
+                    <span class="cli-text">Choose [Y/N/B], press Enter to deny by default:</span><span class="cli-cursor"></span>
+                  </div>
 
-      <section id="install" class="section"><div class="container"><div class="section-head"><div><div class="section-kicker" data-lang="en">Install</div><div class="section-kicker" data-lang="zh">安装</div><h2 data-lang="en">Start from the terminal.</h2><h2 data-lang="zh">从终端开始。</h2></div><p class="section-text" data-lang="en">Clone the repository, install dependencies, configure an OpenAI-compatible endpoint, and launch the CLI.</p><p class="section-text" data-lang="zh">克隆仓库，安装依赖，配置 OpenAI-compatible endpoint，然后启动 CLI。</p></div><div class="split"><div class="big-panel"><h3 data-lang="en">Quick start</h3><h3 data-lang="zh">快速开始</h3><p data-lang="en">Clone, install dependencies, and start the CLI.</p><p data-lang="zh">克隆项目，安装依赖，然后启动 CLI。</p><div class="code">git clone https://github.com/Yule-Cai/Helix-Swarm.git
+                  <div class="demo-line demo-output" data-step="10">
+                    <div data-lang="en">
+                      <div class="cli-green">Evidence Card 1</div>
+                      <div class="cli-muted">File: core/permission_manager.py</div>
+                      <div class="cli-muted">Symbol: _is_in_workspace()</div>
+                      <div class="cli-muted">Evidence: path boundary logic found in permission checks.</div>
+                      <div class="cli-yellow">Suggested fix: strengthen path validation and symlink handling.</div>
+                    </div>
+                    <div data-lang="zh">
+                      <div class="cli-green">Evidence Card 1</div>
+                      <div class="cli-muted">文件：core/permission_manager.py</div>
+                      <div class="cli-muted">符号：_is_in_workspace()</div>
+                      <div class="cli-muted">证据：权限检查中存在路径边界逻辑。</div>
+                      <div class="cli-yellow">修复建议：增强路径校验和符号链接处理。</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="cli-statusbar">
+                  <span>✦ Helix Swarm</span>
+                  <span>Tokens: 276,379</span>
+                  <span>Balance: ∞ (local compute)</span>
+                  <span>LOCAL: liquid/lfm2.5-1.2b</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="demo-map">
+              <div class="agent-detail-label" data-lang="en">Flow Map</div>
+              <div class="agent-detail-label" data-lang="zh">流程图</div>
+              <div class="demo-flow">
+                <div class="flow-step" data-flow="1"><div class="flow-index">01</div><div><h3 data-lang="en">System ready</h3><h3 data-lang="zh">系统就绪</h3><p data-lang="en">Tools, skills, and session state are loaded.</p><p data-lang="zh">工具、技能和会话状态加载完成。</p></div></div>
+                <div class="flow-step" data-flow="2"><div class="flow-index">02</div><div><h3 data-lang="en">User request</h3><h3 data-lang="zh">用户请求</h3><p data-lang="en">The CLI receives a natural-language review task.</p><p data-lang="zh">CLI 接收自然语言审查任务。</p></div></div>
+                <div class="flow-step" data-flow="3"><div class="flow-index">03</div><div><h3 data-lang="en">Thinking state</h3><h3 data-lang="zh">思考状态</h3><p data-lang="en">A visible spinner shows the agent is working.</p><p data-lang="zh">动态字符显示 Agent 正在工作。</p></div></div>
+                <div class="flow-step" data-flow="4"><div class="flow-index">04</div><div><h3 data-lang="en">Tool review</h3><h3 data-lang="zh">工具审查</h3><p data-lang="en">Risky or meaningful tool calls become visible.</p><p data-lang="zh">有风险或关键的工具调用会变得可见。</p></div></div>
+                <div class="flow-step" data-flow="5"><div class="flow-index">05</div><div><h3 data-lang="en">Traceable output</h3><h3 data-lang="zh">可追踪输出</h3><p data-lang="en">The final result includes evidence and next actions.</p><p data-lang="zh">最终结果包含证据和后续动作。</p></div></div>
+              </div>
+              <button class="replay-button" onclick="playCliDemo()"><span data-lang="en">Replay flow</span><span data-lang="zh">重新播放</span></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="architecture" class="section">
+        <div class="narrow">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker" data-lang="en">Architecture</div>
+              <div class="section-kicker" data-lang="zh">架构</div>
+              <h2 data-lang="en">Agency and control in one traceable system.</h2>
+              <h2 data-lang="zh">能力链与控制链，组成一个可追踪系统。</h2>
+            </div>
+            <p class="section-text" data-lang="en">Leo supervises specialist agents. The registry discovers tools. The permission manager decides what needs approval.</p>
+            <p class="section-text" data-lang="zh">Leo 监督专家 Agent，注册表发现工具，权限管理器判断哪些动作需要确认。</p>
+          </div>
+
+          <div class="architecture">
+            <div class="arch-row"><div class="arch-label">Agency Strand</div><div class="arch-content" data-lang="en">User intent, task routing, specialist agents, tool proposals, and execution.</div><div class="arch-content" data-lang="zh">用户意图、任务路由、专家 Agent、工具提议和执行。</div></div>
+            <div class="arch-row"><div class="arch-label">Control Strand</div><div class="arch-content" data-lang="en">Permission review, risk estimation, evidence checks, user approval, and audit logs.</div><div class="arch-content" data-lang="zh">权限审查、风险判断、证据检查、用户确认和审计日志。</div></div>
+            <div class="arch-row"><div class="arch-label">Swarm Layer</div><div class="arch-content" data-lang="en">File Agent, Search Agent, Reviewer, Computer Agent, Tool Registry, and SOP-style skills.</div><div class="arch-content" data-lang="zh">File Agent、Search Agent、Reviewer、Computer Agent、工具注册表和 SOP 风格技能。</div></div>
+            <div class="arch-row"><div class="arch-label">Trace Layer</div><div class="arch-content" data-lang="en">Visible tool calls, approval state, execution output, and evidence-based review cards.</div><div class="arch-content" data-lang="zh">可见工具调用、确认状态、执行输出和基于证据的审查卡片。</div></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="install" class="section">
+        <div class="narrow">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker" data-lang="en">Install</div>
+              <div class="section-kicker" data-lang="zh">安装</div>
+              <h2 data-lang="en">Start from the terminal.</h2>
+              <h2 data-lang="zh">从终端开始。</h2>
+            </div>
+            <p class="section-text" data-lang="en">Clone the repository, install dependencies, configure an OpenAI-compatible endpoint, and launch the CLI.</p>
+            <p class="section-text" data-lang="zh">克隆仓库，安装依赖，配置 OpenAI-compatible endpoint，然后启动 CLI。</p>
+          </div>
+
+          <div class="split">
+            <div class="big-panel">
+              <h3 data-lang="en">Quick start</h3><h3 data-lang="zh">快速开始</h3>
+              <p data-lang="en">Clone, install dependencies, and start the CLI.</p><p data-lang="zh">克隆项目，安装依赖，然后启动 CLI。</p>
+              <div class="code">git clone https://github.com/Yule-Cai/Helix-Swarm.git
 cd Helix-Swarm
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-python3 cli.py</div></div><div class="big-panel"><h3 data-lang="en">Configure</h3><h3 data-lang="zh">配置</h3><p data-lang="en">Point Helix-Swarm at your OpenAI-compatible endpoint.</p><p data-lang="zh">把 Helix-Swarm 指向你的 OpenAI-compatible endpoint。</p><div class="code">/set url http://localhost:1234/v1/chat/completions
+python3 cli.py</div>
+            </div>
+            <div class="big-panel">
+              <h3 data-lang="en">Configure</h3><h3 data-lang="zh">配置</h3>
+              <p data-lang="en">Point Helix-Swarm at your OpenAI-compatible endpoint.</p><p data-lang="zh">把 Helix-Swarm 指向你的 OpenAI-compatible endpoint。</p>
+              <div class="code">/set url http://localhost:1234/v1/chat/completions
 /set model your-model-name
 /set lang en
 
 # 中文
-/set lang zh</div></div></div></div></section>
+/set lang zh</div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <section id="roadmap" class="section"><div class="container"><div class="section-head"><div><div class="section-kicker" data-lang="en">Roadmap</div><div class="section-kicker" data-lang="zh">路线图</div><h2 data-lang="en">Toward the original double-helix swarm.</h2><h2 data-lang="zh">走向最初的双螺旋 Swarm 设想。</h2></div><p class="section-text" data-lang="en">The current CLI is the control layer. The next step is stronger planning, better file pipelines, and a closer implementation of the original planner-plus-parallel-swarm vision.</p><p class="section-text" data-lang="zh">当前 CLI 是控制层。下一步是更强规划、更好的文件管线，以及更接近最初“规划器 + 并行 Swarm”的设想。</p></div><div class="roadmap"><div class="roadmap-item"><span class="mark">01</span><span data-lang="en">Permission-first execution</span><span data-lang="zh">权限优先执行</span></div><div class="roadmap-item"><span class="mark">02</span><span data-lang="en">Evidence Card review mode</span><span data-lang="zh">Evidence Card 审查模式</span></div><div class="roadmap-item"><span class="mark">03</span><span data-lang="en">Skill-aware workflows</span><span data-lang="zh">技能感知工作流</span></div><div class="roadmap-item"><span class="mark">04</span><span data-lang="en">Terminal control layer</span><span data-lang="zh">终端控制层</span></div><div class="roadmap-item"><span class="mark todo">05</span><span data-lang="en">Stronger reviewer verifier</span><span data-lang="zh">更强的审查验证器</span></div><div class="roadmap-item"><span class="mark todo">06</span><span data-lang="en">Double-helix planner and executor</span><span data-lang="zh">双螺旋规划与执行器</span></div></div></div></section>
-      <section class="section"><div class="container"><div class="cta"><h2 data-lang="en">Make agent actions visible.</h2><h2 data-lang="zh">让 Agent 的动作保持可见。</h2><p data-lang="en">Helix-Swarm is experimental, but its direction is clear: agent swarms should be powerful, while their actions remain reviewable.</p><p data-lang="zh">Helix-Swarm 仍处于实验阶段，但方向很清楚：Agent Swarm 可以强大，但它的动作必须可审查。</p><a class="btn primary" href="https://github.com/Yule-Cai/Helix-Swarm" target="_blank" rel="noreferrer"><span data-lang="en">View repository</span><span data-lang="zh">查看仓库</span></a></div></div></section>
+      <section id="roadmap" class="section">
+        <div class="narrow">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker" data-lang="en">Roadmap</div>
+              <div class="section-kicker" data-lang="zh">路线图</div>
+              <h2 data-lang="en">Toward the double-helix swarm.</h2>
+              <h2 data-lang="zh">走向双螺旋 Swarm。</h2>
+            </div>
+            <p class="section-text" data-lang="en">The current CLI is the control layer. The next step is stronger planning, better file pipelines, and a closer implementation of the original planner-plus-parallel-swarm vision.</p>
+            <p class="section-text" data-lang="zh">当前 CLI 是控制层。下一步是更强规划、更好的文件管线，以及更接近最初“规划器 + 并行 Swarm”的设想。</p>
+          </div>
+
+          <div class="roadmap">
+            <div class="roadmap-item"><span class="mark">01</span><span data-lang="en">Permission-first execution</span><span data-lang="zh">权限优先执行</span></div>
+            <div class="roadmap-item"><span class="mark">02</span><span data-lang="en">Evidence Card review mode</span><span data-lang="zh">Evidence Card 审查模式</span></div>
+            <div class="roadmap-item"><span class="mark">03</span><span data-lang="en">Skill-aware workflows</span><span data-lang="zh">技能感知工作流</span></div>
+            <div class="roadmap-item"><span class="mark">04</span><span data-lang="en">Terminal control layer</span><span data-lang="zh">终端控制层</span></div>
+            <div class="roadmap-item"><span class="mark todo">05</span><span data-lang="en">Stronger reviewer verifier</span><span data-lang="zh">更强的审查验证器</span></div>
+            <div class="roadmap-item"><span class="mark todo">06</span><span data-lang="en">Double-helix planner and executor</span><span data-lang="zh">双螺旋规划与执行器</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="narrow">
+          <div class="cta">
+            <h2 data-lang="en">Make agent actions visible.</h2>
+            <h2 data-lang="zh">让 Agent 的动作保持可见。</h2>
+            <p data-lang="en">Helix-Swarm is experimental, but its direction is clear: agent swarms should be powerful, while their actions remain reviewable.</p>
+            <p data-lang="zh">Helix-Swarm 仍处于实验阶段，但方向很清楚：Agent Swarm 可以强大，但它的动作必须可审查。</p>
+            <a class="btn primary" href="https://github.com/Yule-Cai/Helix-Swarm" target="_blank" rel="noreferrer"><span data-lang="en">View repository</span><span data-lang="zh">查看仓库</span></a>
+          </div>
+        </div>
+      </section>
     </main>
-    <footer><span data-lang="en">MIT License · Built by Yule-Cai · Helix-Swarm</span><span data-lang="zh">MIT 许可证 · Yule-Cai 构建 · Helix-Swarm</span></footer>
+
+    <footer>
+      <span data-lang="en">MIT License · Built by Yule-Cai · Helix-Swarm</span>
+      <span data-lang="zh">MIT 许可证 · Yule-Cai 构建 · Helix-Swarm</span>
+    </footer>
   </div>
+
   <script>
-    function setLang(lang){document.body.classList.toggle("zh",lang==="zh");document.documentElement.lang=lang==="zh"?"zh-CN":"en";localStorage.setItem("helix-lang",lang);document.getElementById("btn-en").classList.toggle("active",lang==="en");document.getElementById("btn-zh").classList.toggle("active",lang==="zh");const activeAgent=document.querySelector(".agent-item.active");if(activeAgent)updateAgentPanel(activeAgent.dataset.agent)}
-    const agentText={en:{leo:{code:"A0 / Supervisor",title:"Leo Supervisor",desc:"Leo is the coordinator of the swarm. It decides which specialist should handle the task, when to ask for evidence, and when a risky action must go through permission review.",input:"User intent, task type, active configuration, conversation state.",output:"Delegation plan, specialist calls, final answer.",boundary:"Does not silently execute risky tools; routes them through permission review."},file:{code:"A1 / File",title:"File Agent",desc:"File Agent reads local documents and project files, then converts raw content into usable context for the swarm.",input:"Local file path, file type, read request.",output:"Extracted text, structured summary, file-read errors.",boundary:"Reads only requested files or delegated file paths; reports dependency failures clearly."},search:{code:"A2 / Search",title:"Search Agent",desc:"Search Agent finds skills, code references, and project evidence before the system makes a decision.",input:"Search query, target directory, skill names, project keywords.",output:"Candidate tools, matched files, skill summaries, evidence locations.",boundary:"Searches and reads before concluding; avoids unsupported guesses."},reviewer:{code:"A3 / Review",title:"Reviewer",desc:"Reviewer turns project inspection into Evidence Cards so every claim has a file, symbol, and concrete reason.",input:"Review task, project files, tool results.",output:"Evidence Cards, risk priority, suggested fixes.",boundary:"Cannot make a finding without concrete evidence."},computer:{code:"A4 / Terminal",title:"Computer Agent",desc:"Computer Agent handles terminal-facing actions only after the permission layer makes the action visible.",input:"Approved command, working directory, execution constraints.",output:"Terminal output, error logs, execution status.",boundary:"High-risk commands require explicit user approval."}},zh:{leo:{code:"A0 / Supervisor",title:"Leo Supervisor",desc:"Leo 是 Swarm 的协调者。它决定任务交给哪个专家 Agent，什么时候需要证据，什么时候必须进入权限审查。",input:"用户意图、任务类型、当前配置、对话状态。",output:"委派计划、专家调用、最终回答。",boundary:"不会静默执行高风险工具；会把风险动作送入权限审查。"},file:{code:"A1 / File",title:"File Agent",desc:"File Agent 读取本地文档和项目文件，并把原始内容转成 Swarm 可用的上下文。",input:"本地文件路径、文件类型、读取请求。",output:"提取文本、结构化摘要、文件读取错误。",boundary:"只读取被请求或被委派的文件路径，并明确报告依赖缺失。"},search:{code:"A2 / Search",title:"Search Agent",desc:"Search Agent 在系统做决定前查找 Skill、代码引用和项目证据。",input:"搜索 query、目标目录、Skill 名称、项目关键词。",output:"候选工具、匹配文件、Skill 摘要、证据位置。",boundary:"先搜索和读取，再下结论；避免无证据猜测。"},reviewer:{code:"A3 / Review",title:"Reviewer",desc:"Reviewer 把项目审查转成 Evidence Card，让每个结论都有文件、符号和具体原因。",input:"审查任务、项目文件、工具结果。",output:"Evidence Card、风险优先级、修复建议。",boundary:"没有具体证据就不能给出风险结论。"},computer:{code:"A4 / Terminal",title:"Computer Agent",desc:"Computer Agent 处理面向终端的动作，但前提是权限层已经让动作变得可见。",input:"已确认命令、工作目录、执行限制。",output:"终端输出、错误日志、执行状态。",boundary:"高风险命令必须获得用户明确确认。"}}};
-    function currentLang(){return document.body.classList.contains("zh")?"zh":"en"}
-    function updateAgentPanel(agentKey){const data=agentText[currentLang()][agentKey];if(!data)return;document.getElementById("agent-code").textContent=data.code;document.getElementById("agent-title").textContent=data.title;document.getElementById("agent-desc").textContent=data.desc;document.getElementById("agent-input").textContent=data.input;document.getElementById("agent-output").textContent=data.output;document.getElementById("agent-boundary").textContent=data.boundary;document.getElementById("agent-input-label").textContent=currentLang()==="zh"?"输入":"Input";document.getElementById("agent-output-label").textContent=currentLang()==="zh"?"输出":"Output";document.getElementById("agent-boundary-label").textContent=currentLang()==="zh"?"边界":"Boundary";document.querySelectorAll(".agent-item").forEach(item=>item.classList.toggle("active",item.dataset.agent===agentKey))}
-    document.querySelectorAll(".agent-item").forEach(item=>{item.addEventListener("mouseenter",()=>updateAgentPanel(item.dataset.agent));item.addEventListener("focus",()=>updateAgentPanel(item.dataset.agent));item.addEventListener("click",()=>updateAgentPanel(item.dataset.agent))});
-    let demoTimers=[];function clearDemoTimers(){demoTimers.forEach(timer=>clearTimeout(timer));demoTimers=[]}function playCliDemo(){clearDemoTimers();const lines=Array.from(document.querySelectorAll(".demo-line"));const flowSteps=Array.from(document.querySelectorAll(".flow-step"));lines.forEach(line=>line.classList.remove("show"));flowSteps.forEach(step=>step.classList.remove("active"));[{line:1,flow:1,delay:120},{line:2,flow:1,delay:520},{line:3,flow:1,delay:920},{line:4,flow:1,delay:1320},{line:5,flow:2,delay:1850},{line:6,flow:3,delay:2350},{line:7,flow:3,delay:3150},{line:8,flow:4,delay:3700},{line:9,flow:4,delay:4450},{line:10,flow:5,delay:5350}].forEach(item=>{const timer=setTimeout(()=>{const line=document.querySelector(`.demo-line[data-step="${item.line}"]`);const flow=document.querySelector(`.flow-step[data-flow="${item.flow}"]`);if(line)line.classList.add("show");flowSteps.forEach(step=>step.classList.remove("active"));if(flow)flow.classList.add("active")},item.delay);demoTimers.push(timer)})}
-    const canvas=document.getElementById("dna-bg"),ctx=canvas.getContext("2d"),state={width:0,height:0,dpr:Math.min(window.devicePixelRatio||1,2),time:0,strands:[]};function resizeCanvas(){state.width=window.innerWidth;state.height=window.innerHeight;state.dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=Math.floor(state.width*state.dpr);canvas.height=Math.floor(state.height*state.dpr);canvas.style.width=state.width+"px";canvas.style.height=state.height+"px";ctx.setTransform(state.dpr,0,0,state.dpr,0,0);state.strands=[{x:state.width*.17,y:state.height*.04,height:state.height*1.10,width:Math.min(150,state.width*.18),phase:0,alpha:.23,tilt:-.10},{x:state.width*.80,y:state.height*-.02,height:state.height*1.12,width:Math.min(170,state.width*.20),phase:Math.PI,alpha:.22,tilt:.12},{x:state.width*.52,y:state.height*.12,height:state.height*.86,width:Math.min(120,state.width*.14),phase:Math.PI/2,alpha:.10,tilt:.03}]}
-    function drawHelix(strand,t){const steps=56,pointsA=[],pointsB=[];for(let i=0;i<=steps;i++){const p=i/steps,y=strand.y+p*strand.height,angle=p*Math.PI*8+t+strand.phase,wave=Math.sin(angle),depth=Math.cos(angle),centerX=strand.x+(p-.5)*strand.height*strand.tilt,xA=centerX+wave*strand.width*.5,xB=centerX-wave*strand.width*.5;pointsA.push({x:xA,y,depth});pointsB.push({x:xB,y,depth:-depth})}ctx.lineCap="round";ctx.lineJoin="round";function drawStrand(points,color,alpha){ctx.beginPath();for(let i=0;i<points.length;i++){const pt=points[i];if(i===0)ctx.moveTo(pt.x,pt.y);else ctx.lineTo(pt.x,pt.y)}ctx.strokeStyle=color.replace("ALPHA",alpha);ctx.lineWidth=2;ctx.stroke()}drawStrand(pointsA,"rgba(47,111,78,ALPHA)",strand.alpha);drawStrand(pointsB,"rgba(217,132,53,ALPHA)",strand.alpha);for(let i=2;i<pointsA.length-2;i+=4){const a=pointsA[i],b=pointsB[i],localAlpha=strand.alpha*(.35+Math.abs(a.depth)*.55);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=`rgba(23,23,23,${localAlpha*.52})`;ctx.lineWidth=1;ctx.stroke();ctx.beginPath();ctx.arc(a.x,a.y,3.1+Math.max(a.depth,0)*1.5,0,Math.PI*2);ctx.fillStyle=`rgba(47,111,78,${localAlpha})`;ctx.fill();ctx.beginPath();ctx.arc(b.x,b.y,3.1+Math.max(b.depth,0)*1.5,0,Math.PI*2);ctx.fillStyle=`rgba(217,132,53,${localAlpha})`;ctx.fill()}}
-    function draw(){state.time+=.008;ctx.clearRect(0,0,state.width,state.height);const gradient=ctx.createLinearGradient(0,0,0,state.height);gradient.addColorStop(0,"rgba(251,250,246,.08)");gradient.addColorStop(1,"rgba(251,250,246,.82)");ctx.fillStyle=gradient;ctx.fillRect(0,0,state.width,state.height);for(const strand of state.strands)drawHelix(strand,state.time);requestAnimationFrame(draw)}
-    window.addEventListener("resize",resizeCanvas,{passive:true});resizeCanvas();if(!window.matchMedia("(prefers-reduced-motion: reduce)").matches)requestAnimationFrame(draw);const demoSection=document.getElementById("cli-demo");if(demoSection&&"IntersectionObserver"in window){const demoObserver=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting&&entry.intersectionRatio>.35)playCliDemo()})},{threshold:[.35,.6]});demoObserver.observe(demoSection)}else playCliDemo();setLang(localStorage.getItem("helix-lang")||"en");updateAgentPanel("leo");
+    function setLang(lang) {
+      document.body.classList.toggle("zh", lang === "zh");
+      document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+      localStorage.setItem("helix-lang", lang);
+
+      document.getElementById("btn-en").classList.toggle("active", lang === "en");
+      document.getElementById("btn-zh").classList.toggle("active", lang === "zh");
+
+      const activeAgent = document.querySelector(".agent-item.active");
+      if (activeAgent) updateAgentPanel(activeAgent.dataset.agent);
+    }
+
+    const agentText = {
+      en: {
+        leo: { code: "A0 / Supervisor", title: "Leo Supervisor", desc: "Leo is the coordinator of the swarm. It decides which specialist should handle the task, when to ask for evidence, and when a risky action must go through permission review.", input: "User intent, task type, active configuration, conversation state.", output: "Delegation plan, specialist calls, final answer.", boundary: "Does not silently execute risky tools; routes them through permission review." },
+        file: { code: "A1 / File", title: "File Agent", desc: "File Agent reads local documents and project files, then converts raw content into usable context for the swarm.", input: "Local file path, file type, read request.", output: "Extracted text, structured summary, file-read errors.", boundary: "Reads only requested files or delegated file paths; reports dependency failures clearly." },
+        search: { code: "A2 / Search", title: "Search Agent", desc: "Search Agent finds skills, code references, and project evidence before the system makes a decision.", input: "Search query, target directory, skill names, project keywords.", output: "Candidate tools, matched files, skill summaries, evidence locations.", boundary: "Searches and reads before concluding; avoids unsupported guesses." },
+        reviewer: { code: "A3 / Review", title: "Reviewer", desc: "Reviewer turns project inspection into Evidence Cards so every claim has a file, symbol, and concrete reason.", input: "Review task, project files, tool results.", output: "Evidence Cards, risk priority, suggested fixes.", boundary: "Cannot make a finding without concrete evidence." },
+        computer: { code: "A4 / Terminal", title: "Computer Agent", desc: "Computer Agent handles terminal-facing actions only after the permission layer makes the action visible.", input: "Approved command, working directory, execution constraints.", output: "Terminal output, error logs, execution status.", boundary: "High-risk commands require explicit user approval." }
+      },
+      zh: {
+        leo: { code: "A0 / Supervisor", title: "Leo Supervisor", desc: "Leo 是 Swarm 的协调者。它决定任务交给哪个专家 Agent，什么时候需要证据，什么时候必须进入权限审查。", input: "用户意图、任务类型、当前配置、对话状态。", output: "委派计划、专家调用、最终回答。", boundary: "不会静默执行高风险工具；会把风险动作送入权限审查。" },
+        file: { code: "A1 / File", title: "File Agent", desc: "File Agent 读取本地文档和项目文件，并把原始内容转成 Swarm 可用的上下文。", input: "本地文件路径、文件类型、读取请求。", output: "提取文本、结构化摘要、文件读取错误。", boundary: "只读取被请求或被委派的文件路径，并明确报告依赖缺失。" },
+        search: { code: "A2 / Search", title: "Search Agent", desc: "Search Agent 在系统做决定前查找 Skill、代码引用和项目证据。", input: "搜索 query、目标目录、Skill 名称、项目关键词。", output: "候选工具、匹配文件、Skill 摘要、证据位置。", boundary: "先搜索和读取，再下结论；避免无证据猜测。" },
+        reviewer: { code: "A3 / Review", title: "Reviewer", desc: "Reviewer 把项目审查转成 Evidence Card，让每个结论都有文件、符号和具体原因。", input: "审查任务、项目文件、工具结果。", output: "Evidence Card、风险优先级、修复建议。", boundary: "没有具体证据就不能给出风险结论。" },
+        computer: { code: "A4 / Terminal", title: "Computer Agent", desc: "Computer Agent 处理面向终端的动作，但前提是权限层已经让动作变得可见。", input: "已确认命令、工作目录、执行限制。", output: "终端输出、错误日志、执行状态。", boundary: "高风险命令必须获得用户明确确认。" }
+      }
+    };
+
+    function currentLang() { return document.body.classList.contains("zh") ? "zh" : "en"; }
+
+    function updateAgentPanel(agentKey) {
+      const lang = currentLang();
+      const data = agentText[lang][agentKey];
+      if (!data) return;
+
+      document.getElementById("agent-code").textContent = data.code;
+      document.getElementById("agent-title").textContent = data.title;
+      document.getElementById("agent-desc").textContent = data.desc;
+      document.getElementById("agent-input").textContent = data.input;
+      document.getElementById("agent-output").textContent = data.output;
+      document.getElementById("agent-boundary").textContent = data.boundary;
+
+      document.getElementById("agent-input-label").textContent = lang === "zh" ? "输入" : "Input";
+      document.getElementById("agent-output-label").textContent = lang === "zh" ? "输出" : "Output";
+      document.getElementById("agent-boundary-label").textContent = lang === "zh" ? "边界" : "Boundary";
+
+      document.querySelectorAll(".agent-item").forEach(item => {
+        item.classList.toggle("active", item.dataset.agent === agentKey);
+      });
+    }
+
+    document.querySelectorAll(".agent-item").forEach(item => {
+      item.addEventListener("mouseenter", () => updateAgentPanel(item.dataset.agent));
+      item.addEventListener("focus", () => updateAgentPanel(item.dataset.agent));
+      item.addEventListener("click", () => updateAgentPanel(item.dataset.agent));
+    });
+
+    let demoTimers = [];
+    function clearDemoTimers() {
+      demoTimers.forEach(timer => clearTimeout(timer));
+      demoTimers = [];
+    }
+
+    function playCliDemo() {
+      clearDemoTimers();
+      const lines = Array.from(document.querySelectorAll(".demo-line"));
+      const flowSteps = Array.from(document.querySelectorAll(".flow-step"));
+      lines.forEach(line => line.classList.remove("show"));
+      flowSteps.forEach(step => step.classList.remove("active"));
+
+      const sequence = [
+        { line: 1, flow: 1, delay: 120 },
+        { line: 2, flow: 1, delay: 520 },
+        { line: 3, flow: 1, delay: 920 },
+        { line: 4, flow: 1, delay: 1320 },
+        { line: 5, flow: 2, delay: 1850 },
+        { line: 6, flow: 3, delay: 2350 },
+        { line: 7, flow: 3, delay: 3150 },
+        { line: 8, flow: 4, delay: 3700 },
+        { line: 9, flow: 4, delay: 4450 },
+        { line: 10, flow: 5, delay: 5350 }
+      ];
+
+      sequence.forEach(item => {
+        const timer = setTimeout(() => {
+          const line = document.querySelector(`.demo-line[data-step="${item.line}"]`);
+          const flow = document.querySelector(`.flow-step[data-flow="${item.flow}"]`);
+          if (line) line.classList.add("show");
+          flowSteps.forEach(step => step.classList.remove("active"));
+          if (flow) flow.classList.add("active");
+        }, item.delay);
+        demoTimers.push(timer);
+      });
+    }
+
+    const canvas = document.getElementById("dna-bg");
+    const ctx = canvas.getContext("2d");
+    const state = { width: 0, height: 0, dpr: Math.min(window.devicePixelRatio || 1, 2), time: 0, strands: [] };
+
+    function resizeCanvas() {
+      state.width = window.innerWidth;
+      state.height = window.innerHeight;
+      state.dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.floor(state.width * state.dpr);
+      canvas.height = Math.floor(state.height * state.dpr);
+      canvas.style.width = state.width + "px";
+      canvas.style.height = state.height + "px";
+      ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+      state.strands = [
+        { x: state.width * 0.08, y: state.height * 0.02, height: state.height * 1.10, width: Math.min(150, state.width * 0.18), phase: 0, alpha: 0.16, tilt: -0.10 },
+        { x: state.width * 0.92, y: state.height * -0.02, height: state.height * 1.12, width: Math.min(170, state.width * 0.20), phase: Math.PI, alpha: 0.16, tilt: 0.12 },
+        { x: state.width * 0.50, y: state.height * 0.08, height: state.height * 0.86, width: Math.min(120, state.width * 0.14), phase: Math.PI / 2, alpha: 0.07, tilt: 0.03 }
+      ];
+    }
+
+    function drawHelix(strand, t) {
+      const steps = 56;
+      const pointsA = [];
+      const pointsB = [];
+
+      for (let i = 0; i <= steps; i++) {
+        const p = i / steps;
+        const y = strand.y + p * strand.height;
+        const angle = p * Math.PI * 8 + t + strand.phase;
+        const wave = Math.sin(angle);
+        const depth = Math.cos(angle);
+        const centerX = strand.x + (p - 0.5) * strand.height * strand.tilt;
+        pointsA.push({ x: centerX + wave * strand.width * 0.5, y, depth });
+        pointsB.push({ x: centerX - wave * strand.width * 0.5, y, depth: -depth });
+      }
+
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
+      function drawStrand(points, color, alpha) {
+        ctx.beginPath();
+        for (let i = 0; i < points.length; i++) {
+          const pt = points[i];
+          if (i === 0) ctx.moveTo(pt.x, pt.y);
+          else ctx.lineTo(pt.x, pt.y);
+        }
+        ctx.strokeStyle = color.replace("ALPHA", alpha);
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      drawStrand(pointsA, "rgba(47, 111, 78, ALPHA)", strand.alpha);
+      drawStrand(pointsB, "rgba(217, 132, 53, ALPHA)", strand.alpha);
+
+      for (let i = 2; i < pointsA.length - 2; i += 4) {
+        const a = pointsA[i];
+        const b = pointsB[i];
+        const localAlpha = strand.alpha * (0.35 + Math.abs(a.depth) * 0.55);
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.strokeStyle = `rgba(23, 23, 23, ${localAlpha * 0.52})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(a.x, a.y, 3.1 + Math.max(a.depth, 0) * 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(47, 111, 78, ${localAlpha})`;
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, 3.1 + Math.max(b.depth, 0) * 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(217, 132, 53, ${localAlpha})`;
+        ctx.fill();
+      }
+    }
+
+    function draw() {
+      state.time += 0.008;
+      ctx.clearRect(0, 0, state.width, state.height);
+      const gradient = ctx.createLinearGradient(0, 0, 0, state.height);
+      gradient.addColorStop(0, "rgba(251, 250, 246, 0.08)");
+      gradient.addColorStop(1, "rgba(251, 250, 246, 0.82)");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, state.width, state.height);
+      for (const strand of state.strands) drawHelix(strand, state.time);
+      requestAnimationFrame(draw);
+    }
+
+    window.addEventListener("resize", resizeCanvas, { passive: true });
+    resizeCanvas();
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) requestAnimationFrame(draw);
+
+    const demoSection = document.getElementById("cli-demo");
+    if (demoSection && "IntersectionObserver" in window) {
+      const demoObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && entry.intersectionRatio > 0.35) playCliDemo();
+        });
+      }, { threshold: [0.35, 0.6] });
+      demoObserver.observe(demoSection);
+    } else {
+      playCliDemo();
+    }
+
+    setLang(localStorage.getItem("helix-lang") || "en");
+    updateAgentPanel("leo");
   </script>
 </body>
 </html>
