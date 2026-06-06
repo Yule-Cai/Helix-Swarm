@@ -11,20 +11,57 @@
 
 # Helix-Swarm
 
-### AI agents should ask before they act.
-
-### AI Agent 在行动前，应该先让你看见。
+### A double-helix control architecture for safer agent swarms.
 
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
-[![Permission First](https://img.shields.io/badge/Permission--First-Agent-111111?style=flat-square)](#)
-[![Evidence Cards](https://img.shields.io/badge/Evidence--Cards-Review-2f6f4e?style=flat-square)](#)
-[![Skill Aware](https://img.shields.io/badge/Skill--Aware-Workflows-d98435?style=flat-square)](#)
-[![CLI](https://img.shields.io/badge/CLI-Control%20Layer-6d91b8?style=flat-square)](#)
+[![Double Helix](https://img.shields.io/badge/Double--Helix-Control-111111?style=flat-square)](#)
+[![Permission First](https://img.shields.io/badge/Permission--First-Agent-2f6f4e?style=flat-square)](#)
+[![Evidence Cards](https://img.shields.io/badge/Evidence--Cards-Review-d98435?style=flat-square)](#)
+[![Skill Aware](https://img.shields.io/badge/Skill--Aware-Workflows-6d91b8?style=flat-square)](#)
 [![License](https://img.shields.io/badge/License-MIT-22c55e?style=flat-square)](LICENSE)
 
-[English](#-what-is-helix-swarm) · [中文](#-helix-swarm-是什么) · [Install](#-installation--安装) · [Usage](#-usage--使用方式) · [Architecture](#-architecture--架构) · [Roadmap](#-roadmap--路线图)
+[Meaning](#-why-helix-swarm) · [Features](#-core-features) · [Architecture](#-architecture) · [Install](#-installation) · [Usage](#-usage) · [Roadmap](#-roadmap)
 
 </div>
+
+---
+
+## 🧬 Why Helix-Swarm?
+
+**Helix-Swarm** means a swarm of agents controlled by a double-helix structure.
+
+The project started from a simple idea:
+
+> An agent should not only plan and act.  
+> It should also be checked, approved, and traced.
+
+So Helix-Swarm is built around two intertwined strands:
+
+```text
+Strand A — Agency
+User intent → task routing → specialist agents → tool proposals → execution
+
+Strand B — Control
+permission review → evidence checks → audit logs → user approval → traceable result
+```
+
+These two strands form the **Helix**.
+
+The **Swarm** is the group of specialist agents, tools, and skills that work around the supervisor agent.
+
+```text
+Leo Supervisor
+    ├── File Agent
+    ├── Search Agent
+    ├── Reviewer
+    ├── Computer Agent
+    ├── Tool Registry
+    └── SkillHub / SOP Skills
+```
+
+Helix-Swarm is not trying to be the most autonomous agent framework.
+
+It is trying to be a more **controlled**, **auditable**, and **permission-aware** one.
 
 ---
 
@@ -32,9 +69,17 @@
 
 **Helix-Swarm** is a permission-first CLI agent framework for safe tool use, evidence-based project review, and skill-aware workflows.
 
-It is designed for developers who want AI agents that can inspect files, compare skills, call tools, and execute terminal actions — while keeping risky steps visible, reviewable, and rejectable.
+It is designed for developers who want agents that can:
 
-The core idea is simple:
+- inspect files;
+- compare tools and skills;
+- call specialist agents;
+- propose terminal actions;
+- read project context;
+- review code with evidence;
+- ask before risky execution.
+
+The central philosophy is:
 
 ```text
 Agent proposes.
@@ -44,105 +89,39 @@ Tool executes.
 Result is traceable.
 ```
 
-Helix-Swarm is not trying to be the most autonomous agent.  
-It is trying to be a more controllable one.
-
 ---
 
-## ✨ Helix-Swarm 是什么？
+## 🔥 Core Features
 
-**Helix-Swarm** 是一个权限优先的 CLI Agent 框架，面向安全工具调用、证据化项目审查和技能感知工作流。
+### 1. Double-Helix Agent Control
 
-它适合希望 AI Agent 能读取文件、比较技能、调用工具、执行终端动作，同时又希望高风险步骤保持可见、可审查、可拒绝的开发者。
-
-核心逻辑很简单：
+Most agent systems focus on the action path:
 
 ```text
-Agent 提议。
-系统解释。
-用户确认。
-工具执行。
-结果可追踪。
+prompt → plan → tool → result
 ```
 
-Helix-Swarm 不是为了做“最自动”的 Agent。  
-它更关注做一个**更可控的 Agent**。
-
----
-
-## 🧭 Project Philosophy / 项目理念
-
-### Permission-first execution
-
-High-risk actions should not happen silently.
-
-Terminal commands, installs, file writes, edits, deletes, and script execution are reviewed before they run.
-
-### 权限优先执行
-
-高风险动作不应该静默发生。
-
-终端命令、安装、文件写入、编辑、删除和脚本执行都应该先经过审查。
-
----
-
-### Human-in-the-loop tool use
-
-The agent can suggest actions, but the user keeps final authority over risky operations.
-
-### 人在回路中的工具调用
-
-Agent 可以提出动作，但用户保留对高风险操作的最终决定权。
-
----
-
-### Evidence-based review
-
-Project review should not be generic advice.
-
-Every serious finding should include:
+Helix-Swarm adds a second control path:
 
 ```text
-File
-Symbol
-Evidence
-Risk
-Consequence
-Suggested fix
+proposal → permission check → evidence check → approval → audit
 ```
 
-### 基于证据的审查
-
-项目审查不应该只是泛泛而谈。
-
-每个关键发现都应该包含：
+That is the double-helix architecture:
 
 ```text
-文件路径
-函数 / 类 / 规则名
-证据
-风险原因
-可能后果
-修复建议
+Agency strand:  intent → agents → tools → execution
+Control strand: policy → evidence → approval → trace
 ```
 
----
-
-### Skill-aware workflows
-
-Skills should be searchable, comparable, and inspectable before they are installed or used.
-
-### 技能感知型工作流
-
-Skill 不应该盲目安装或调用，而应该先搜索、比较、检查，再决定是否使用。
+The goal is not to stop agents from acting.  
+The goal is to make their actions visible before they happen.
 
 ---
 
-## ✅ Key Features / 核心功能
+### 2. Permission-First Tool Execution
 
-### 🛡️ Permission-first tool execution
-
-Low-risk tools can be allowed automatically:
+Low-risk tools can be automatically allowed:
 
 ```text
 read_file
@@ -153,7 +132,7 @@ list_directory
 delegate_to_expert
 ```
 
-Risky tools require review:
+High-risk tools require approval:
 
 ```text
 execute_terminal
@@ -173,11 +152,29 @@ N = Deny
 B = Block this tool for this session
 ```
 
+This makes tool use visible, interruptible, and controllable.
+
 ---
 
-### 🧾 Evidence Card review
+### 3. Human-in-the-Loop Approval
 
-For review, audit, security, permission, and bug-finding tasks, Helix-Swarm forces structured evidence.
+Helix-Swarm does not assume that an agent should always be allowed to act.
+
+When an operation can modify the system, install packages, execute shell commands, or touch files, the user remains in the loop.
+
+```text
+Agent: I want to run this command.
+System: Here is the tool, risk level, and arguments.
+User: Approve / deny / block.
+```
+
+The user keeps final authority over sensitive steps.
+
+---
+
+### 4. Evidence Card Review
+
+For review, audit, security, permission, and bug-finding tasks, Helix-Swarm requires structured evidence.
 
 ```text
 Evidence Card 1
@@ -189,13 +186,21 @@ Evidence Card 1
 - Suggested fix:
 ```
 
-This makes the reviewer less like a vague security report generator and more like a traceable code auditor.
+This turns the reviewer from a generic advice generator into a traceable project auditor.
+
+A finding is not accepted unless it is tied to concrete code evidence.
 
 ---
 
-### 🧩 Skill-aware agent workflow
+### 5. Skill-Aware Workflows
 
-Helix-Swarm can search and compare SkillHub skills before installing them.
+Helix-Swarm can search and compare SkillHub-style skills before using or installing them.
+
+Instead of blindly adding capabilities, the workflow becomes:
+
+```text
+Search → Compare → Explain → Ask → Install
+```
 
 Example:
 
@@ -203,26 +208,34 @@ Example:
 skillhub search calendar
 ```
 
-Then ask:
+Then:
 
 ```text
 Compare calendar-cli, google-calendar, and google-calendar-api.
 Do not install anything.
 ```
 
-The goal is not just “install skills”, but:
-
-```text
-Search → Compare → Explain → Ask → Install
-```
+The agent should explain the tradeoff before taking action.
 
 ---
 
-### 🖥️ Terminal control layer
+### 6. Terminal Control Layer
 
 The terminal is the control surface.
 
-Helix-Swarm is designed around a simple CLI loop where users can chat, inspect tools, switch models, change language, review permissions, and run commands with approval.
+Helix-Swarm is built around a CLI loop where users can:
+
+```text
+chat
+inspect tool calls
+switch language
+review permissions
+compare skills
+read files
+run commands with approval
+```
+
+Common commands:
 
 ```bash
 /set lang en
@@ -230,66 +243,30 @@ Helix-Swarm is designed around a simple CLI loop where users can chat, inspect t
 /permission
 /models
 /stats
+/reload
 ```
 
 ---
 
-### 📄 File-aware agent context
+### 7. Traceable Agent Actions
 
-Helix-Swarm can detect local file paths and route them into the file-reading workflow.
+Tool calls, permission checks, review results, and execution outputs are visible.
 
-Supported depending on installed extractors:
+Helix-Swarm avoids the “black box agent” feeling by exposing:
 
 ```text
-PDF
-DOCX
-TXT
-Markdown
-source files
-project files
+which tool is called
+why it is risky
+what arguments are passed
+what the tool returned
+whether the action was approved
 ```
 
-Example:
-
-```text
-Read /Users/you/Desktop/resume.pdf and summarize improvements.
-```
+This makes the agent easier to debug and safer to maintain.
 
 ---
 
-### 🌐 Bilingual CLI
-
-Switch language inside the CLI:
-
-```bash
-/set lang en
-/set lang zh
-```
-
-This affects:
-
-```text
-CLI status text
-tool review panels
-agent reply labels
-system language instruction
-Evidence Card templates
-local compute labels
-```
-
----
-
-### 🧠 Model-flexible backend
-
-Helix-Swarm works with local or OpenAI-compatible endpoints.
-
-It can use local model servers such as LM Studio, or a custom API endpoint.
-
-Some models may support additional abilities such as thinking or vision, but Helix-Swarm’s main value is the permission-first workflow around tool use.
-
----
-
-## 🏗 Architecture / 架构
+## 🏗 Architecture
 
 ```text
 User Input
@@ -327,47 +304,32 @@ CLI Router
             └── Memory / Compression
 ```
 
-中文说明：
+### The Double-Helix Control Pattern
 
 ```text
-用户输入
-    │
-    ▼
-CLI 路由器
-    │
-    ├── Slash 命令
-    │       ├── /set
-    │       ├── /reload
-    │       ├── /models
-    │       ├── /permission
-    │       └── /stats
-    │
-    ├── 直接终端命令检测
-    │       └── 权限审查
-    │
-    └── Leo Supervisor Agent
-            │
-            ├── 专家 Agent
-            │       ├── File Agent
-            │       ├── Search Agent
-            │       ├── Reviewer
-            │       └── Computer Agent
-            │
-            ├── 工具注册表
-            │       ├── read_file
-            │       ├── grep_code
-            │       ├── glob_files
-            │       ├── find_skills
-            │       └── execute_terminal
-            │
-            ├── 权限管理器
-            ├── 审计日志
-            └── 记忆 / 上下文压缩
+                    ┌──────────────────────────────┐
+                    │        User Intent            │
+                    └──────────────┬───────────────┘
+                                   │
+             ┌─────────────────────┴─────────────────────┐
+             │                                           │
+             ▼                                           ▼
+     Agency Strand                                Control Strand
+     ─────────────                                ──────────────
+     Route task                                   Check scope
+     Select agent                                 Estimate risk
+     Propose tool                                 Ask permission
+     Execute action                               Record evidence
+     Return result                                Audit outcome
+             │                                           │
+             └─────────────────────┬─────────────────────┘
+                                   ▼
+                         Traceable Agent Output
 ```
 
 ---
 
-## 📦 Project Structure / 项目结构
+## 📦 Project Structure
 
 ```text
 Helix-Swarm/
@@ -397,44 +359,42 @@ Helix-Swarm/
 
 ---
 
-## ⚡ Installation / 安装
+## ⚡ Installation
 
-### 1. Clone / 克隆仓库
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/Yule-Cai/Helix-Swarm.git
 cd Helix-Swarm
 ```
 
-### 2. Create environment / 创建环境
+### 2. Create a Python environment
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-Windows:
+On Windows:
 
 ```powershell
 python -m venv .venv
 .venv\Scripts\activate
 ```
 
-### 3. Install dependencies / 安装依赖
+### 3. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configure model endpoint / 配置模型接口
-
-Example:
+### 4. Configure your model endpoint
 
 ```bash
 cp helix_config.example.json helix_config.json
 ```
 
-Example config:
+Example:
 
 ```json
 {
@@ -456,7 +416,7 @@ Example config:
 }
 ```
 
-### 5. Start / 启动
+### 5. Start Helix-Swarm
 
 ```bash
 python3 cli.py
@@ -464,30 +424,22 @@ python3 cli.py
 
 ---
 
-## 📖 Usage / 使用方式
+## 📖 Usage
 
-### Basic chat / 普通聊天
+### Basic chat
 
 ```text
 hello
 ```
 
-```text
-你好
-```
-
----
-
-### Switch language / 切换语言
+### Switch language
 
 ```bash
 /set lang en
 /set lang zh
 ```
 
----
-
-### Compare skills before installing / 安装前比较技能
+### Compare skills before installation
 
 ```text
 I want to install a Google Calendar related skill.
@@ -495,27 +447,14 @@ Compare calendar-cli, google-calendar, and google-calendar-api.
 Do not install anything.
 ```
 
-```text
-我想安装一个 Google Calendar 相关的 skill。
-先比较 calendar-cli、google-calendar、google-calendar-api。
-不要安装。
-```
-
----
-
-### Review a project with evidence / 基于证据审查项目
+### Review a project with Evidence Cards
 
 ```text
 Review the current Helix-Swarm project and identify 3 concrete risks.
 Read-only. Do not modify code.
 ```
 
-```text
-审查当前 Helix-Swarm 项目，找出 3 个具体风险点。
-只读，不要修改代码。
-```
-
-Expected output:
+Expected format:
 
 ```text
 Evidence Card 1
@@ -527,9 +466,7 @@ Evidence Card 1
 - Suggested fix:
 ```
 
----
-
-### Run a command with approval / 带审查执行命令
+### Run a command with approval
 
 ```bash
 pip install PyPDF2
@@ -537,33 +474,28 @@ pip install PyPDF2
 
 Helix-Swarm will ask before running higher-risk commands.
 
-Helix-Swarm 会在执行高风险命令前请求确认。
-
 ---
 
-## 🛡 Safety Model / 安全模型
+## 🛡 Safety Model
 
-| Operation Type | Behavior | 中文说明 |
-|---|---|---|
-| Read/search/list tools | Usually auto-approved | 读取、搜索、列表类工具通常自动允许 |
-| Skill search | Auto-approved | Skill 搜索自动允许 |
-| Agent delegation | Auto-approved | Agent 委派自动允许 |
-| Terminal command | Reviewed | 终端命令需要审查 |
-| Install command | Reviewed | 安装命令需要审查 |
-| File write/edit/delete | Reviewed | 写入、编辑、删除文件需要审查 |
-| Dangerous shell patterns | High-risk review | 危险 shell 模式会进入高风险审查 |
+| Operation Type | Behavior |
+|---|---|
+| Read/search/list tools | Usually auto-approved |
+| Skill search | Auto-approved |
+| Agent delegation | Auto-approved |
+| Terminal command | Reviewed |
+| Install command | Reviewed |
+| File write/edit/delete | Reviewed |
+| Dangerous shell patterns | High-risk review |
 
-Helix-Swarm is not a full operating-system sandbox. It is a local agent framework with permission gates.
+Helix-Swarm is not a full operating-system sandbox.
 
-Helix-Swarm 不是完整操作系统沙箱，而是一个带权限审查的本地 Agent 框架。
-
+It is a permission-first agent control layer.  
 Do not approve commands you do not understand.
 
-不要确认你不理解的命令。
-
 ---
 
-## 🧪 Manual Regression Tests / 手动回归测试
+## 🧪 Manual Regression Tests
 
 Before publishing a new version, test:
 
@@ -575,7 +507,7 @@ Before publishing a new version, test:
 5. skillhub install calendar-cli
 6. Read a local PDF
 7. Review current project with Evidence Cards
-8. rm -rf /Users/you/Desktop/test_folder
+8. Try a dangerous command and verify approval is required
 9. Compare multiple skills without installing
 ```
 
@@ -589,94 +521,49 @@ Language switching changes CLI and agent output.
 Risky tool calls remain visible.
 ```
 
-中文预期：
+---
 
-```text
-低风险查询可以顺畅运行。
-高风险命令必须确认。
-审查回答必须包含文件、函数和证据。
-语言切换会影响 CLI 和 Agent 输出。
-高风险工具调用保持可见。
-```
+## 🗺 Roadmap
+
+- [x] CLI-first agent control layer
+- [x] Permission-gated terminal execution
+- [x] Human-in-the-loop approval
+- [x] Evidence Card review mode
+- [x] Skill-aware workflow
+- [x] Chinese / English CLI switching
+- [x] Local file reading
+- [ ] Stronger reviewer verifier
+- [ ] Unified `/file` pipeline for PDF / DOCX / XLSX / images / ZIP
+- [ ] `/image` command for vision-capable models
+- [ ] More skill adapters
+- [ ] Optional lightweight Web UI
+- [ ] Closer implementation of the original double-helix planner/executor architecture
 
 ---
 
-## 🗺 Roadmap / 路线图
-
-- [x] CLI-first agent control layer  
-      CLI 优先的 Agent 控制层
-
-- [x] Permission-gated terminal execution  
-      终端执行权限审查
-
-- [x] Evidence Card review mode  
-      证据卡审查模式
-
-- [x] Skill-aware workflow  
-      技能感知工作流
-
-- [x] Chinese / English CLI switching  
-      中英文 CLI 切换
-
-- [x] Local file reading  
-      本地文件读取
-
-- [ ] Stronger reviewer verifier  
-      更强的审查验证器
-
-- [ ] Unified `/file` pipeline for PDF / DOCX / XLSX / images / ZIP  
-      统一 `/file` 管线，支持 PDF / DOCX / XLSX / 图片 / ZIP
-
-- [ ] `/image` command for vision-capable models  
-      面向视觉模型的 `/image` 命令
-
-- [ ] More skill adapters  
-      更多 Skill 适配器
-
-- [ ] Optional lightweight Web UI  
-      可选轻量 Web UI
-
----
-
-## 🤝 Contributing / 贡献
+## 🤝 Contributing
 
 Issues and pull requests are welcome.
-
-欢迎提交 Issue 和 Pull Request。
 
 Good first contribution areas:
 
 ```text
-Better permission rules
-Better file extractors
-More SkillHub adapters
+Permission rules
+File extractors
+SkillHub adapters
 Reviewer verification
 Documentation
-Language translations
-```
-
-适合贡献的方向：
-
-```text
-更稳的权限规则
-更好的文件提取器
-更多 SkillHub 适配
-审查验证器
-文档优化
-多语言翻译
+Language support
+Agent orchestration
 ```
 
 ---
 
-## ⚠️ Disclaimer / 免责声明
+## ⚠️ Disclaimer
 
 Helix-Swarm can execute local tools and terminal commands after approval.
 
-Helix-Swarm 可以在确认后执行本地工具和终端命令。
-
 Use it carefully.
-
-请谨慎使用。
 
 Avoid committing:
 
@@ -689,20 +576,9 @@ local memory
 private documents
 ```
 
-避免提交：
-
-```text
-helix_config.json
-.env
-API keys
-审计日志
-本地记忆
-私人文件
-```
-
 ---
 
-## 📄 License / 许可证
+## 📄 License
 
 MIT License.
 
