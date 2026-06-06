@@ -851,8 +851,11 @@ def main():
             task_type = model_router.classify_task(user_input)
             console.print(f"[dim]{t('task_type')}: {task_type.value}[/]")
 
-            console.print(f"[dim]{get_thinking_status()}[/]")
-            swarm.chat(user_input)
+            # Keep the old Helix-Swarm thinking animation.
+            # Rich "status" uses a non-circle spinner such as dots2 and automatically
+            # stops when swarm.chat returns or when normal output needs to be printed.
+            with console.status(get_thinking_status(), spinner="dots2"):
+                swarm.chat(user_input)
 
             GLOBAL_STATE["balance"] = HermesToolkit.get_api_balance()
 
