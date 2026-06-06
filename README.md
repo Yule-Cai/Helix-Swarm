@@ -11,15 +11,15 @@
 
 # Helix-Swarm
 
-### A local-first CLI agent swarm with safe tool approval, SkillHub integration, evidence-based review, and Gemma 4 thinking.
+### AI agents should ask before they act.
 
-### 一个本地优先的 CLI Agent Swarm，支持安全工具审查、SkillHub 集成、证据卡审查和 Gemma 4 Thinking。
+### AI Agent 在行动前，应该先让你看见。
 
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
-[![Local First](https://img.shields.io/badge/Local--First-Agent-22c55e?style=flat-square)](#)
-[![CLI](https://img.shields.io/badge/CLI--First-Terminal-0ea5e9?style=flat-square)](#)
-[![LM Studio](https://img.shields.io/badge/LM%20Studio-Compatible-8b5cf6?style=flat-square)](https://lmstudio.ai/)
-[![SkillHub](https://img.shields.io/badge/SkillHub-Integrated-f59e0b?style=flat-square)](#)
+[![Permission First](https://img.shields.io/badge/Permission--First-Agent-111111?style=flat-square)](#)
+[![Evidence Cards](https://img.shields.io/badge/Evidence--Cards-Review-2f6f4e?style=flat-square)](#)
+[![Skill Aware](https://img.shields.io/badge/Skill--Aware-Workflows-d98435?style=flat-square)](#)
+[![CLI](https://img.shields.io/badge/CLI-Control%20Layer-6d91b8?style=flat-square)](#)
 [![License](https://img.shields.io/badge/License-MIT-22c55e?style=flat-square)](LICENSE)
 
 [English](#-what-is-helix-swarm) · [中文](#-helix-swarm-是什么) · [Install](#-installation--安装) · [Usage](#-usage--使用方式) · [Architecture](#-architecture--架构) · [Roadmap](#-roadmap--路线图)
@@ -30,127 +30,119 @@
 
 ## ✨ What is Helix-Swarm?
 
-**Helix-Swarm** is a CLI-first local agent framework designed for terminal workflows.
+**Helix-Swarm** is a permission-first CLI agent framework for safe tool use, evidence-based project review, and skill-aware workflows.
 
-It connects local or OpenAI-compatible models with tool calling, SkillHub skills, file reading, permission-gated terminal execution, and evidence-based code review.
+It is designed for developers who want AI agents that can inspect files, compare skills, call tools, and execute terminal actions — while keeping risky steps visible, reviewable, and rejectable.
 
-The goal is simple:
+The core idea is simple:
 
-> Give local agents useful tool abilities without giving them silent uncontrolled system power.
+```text
+Agent proposes.
+System explains.
+User approves.
+Tool executes.
+Result is traceable.
+```
 
-Helix-Swarm is built for users who want:
-
-- local-first AI agents;
-- LM Studio / OpenAI-compatible model support;
-- controlled terminal execution;
-- safer tool approval;
-- SkillHub skill discovery;
-- PDF and file reading;
-- evidence-based project review;
-- Chinese / English CLI switching;
-- Gemma 4 thinking mode support.
+Helix-Swarm is not trying to be the most autonomous agent.  
+It is trying to be a more controllable one.
 
 ---
 
 ## ✨ Helix-Swarm 是什么？
 
-**Helix-Swarm** 是一个 CLI 优先、本地优先的 Agent 框架，面向终端工作流。
+**Helix-Swarm** 是一个权限优先的 CLI Agent 框架，面向安全工具调用、证据化项目审查和技能感知工作流。
 
-它把本地模型或 OpenAI-compatible 模型连接到工具调用、SkillHub 技能、文件读取、终端执行审查和代码证据卡审查流程中。
+它适合希望 AI Agent 能读取文件、比较技能、调用工具、执行终端动作，同时又希望高风险步骤保持可见、可审查、可拒绝的开发者。
 
-核心目标很简单：
+核心逻辑很简单：
 
-> 让本地 Agent 能真正使用工具，但不能静默地获得不受控制的系统权限。
+```text
+Agent 提议。
+系统解释。
+用户确认。
+工具执行。
+结果可追踪。
+```
 
-Helix-Swarm 适合这些场景：
-
-- 本地 AI Agent；
-- LM Studio / OpenAI-compatible 模型；
-- 终端命令执行审查；
-- 安全工具调用；
-- SkillHub 技能搜索；
-- PDF 和文件读取；
-- 基于证据的项目审查；
-- 中英文 CLI 切换；
-- Gemma 4 thinking mode。
+Helix-Swarm 不是为了做“最自动”的 Agent。  
+它更关注做一个**更可控的 Agent**。
 
 ---
 
-## 🔥 Why Helix-Swarm?
+## 🧭 Project Philosophy / 项目理念
 
-Many local agent projects are either too chat-like, too UI-heavy, or too unsafe by default.
+### Permission-first execution
 
-Helix-Swarm takes a more practical route:
+High-risk actions should not happen silently.
+
+Terminal commands, installs, file writes, edits, deletes, and script execution are reviewed before they run.
+
+### 权限优先执行
+
+高风险动作不应该静默发生。
+
+终端命令、安装、文件写入、编辑、删除和脚本执行都应该先经过审查。
+
+---
+
+### Human-in-the-loop tool use
+
+The agent can suggest actions, but the user keeps final authority over risky operations.
+
+### 人在回路中的工具调用
+
+Agent 可以提出动作，但用户保留对高风险操作的最终决定权。
+
+---
+
+### Evidence-based review
+
+Project review should not be generic advice.
+
+Every serious finding should include:
 
 ```text
-CLI first.
-Local first.
-Tool-aware.
-Permission-gated.
-Evidence-based.
-Skill-extensible.
+File
+Symbol
+Evidence
+Risk
+Consequence
+Suggested fix
 ```
 
-Instead of letting an agent freely run commands, Helix-Swarm adds an approval layer:
+### 基于证据的审查
+
+项目审查不应该只是泛泛而谈。
+
+每个关键发现都应该包含：
 
 ```text
-Ask → Inspect → Approve → Execute → Verify
+文件路径
+函数 / 类 / 规则名
+证据
+风险原因
+可能后果
+修复建议
 ```
 
 ---
 
-## 🔥 为什么做 Helix-Swarm？
+### Skill-aware workflows
 
-很多本地 Agent 项目要么只是聊天工具，要么过早做复杂 UI，要么默认权限太大。
+Skills should be searchable, comparable, and inspectable before they are installed or used.
 
-Helix-Swarm 选择更稳的路线：
+### 技能感知型工作流
 
-```text
-CLI 优先。
-本地优先。
-工具感知。
-权限审查。
-证据驱动。
-技能可扩展。
-```
-
-它不是让 Agent 随便运行命令，而是加入审查流程：
-
-```text
-请求 → 检查 → 确认 → 执行 → 验证
-```
+Skill 不应该盲目安装或调用，而应该先搜索、比较、检查，再决定是否使用。
 
 ---
 
 ## ✅ Key Features / 核心功能
 
-### 🧠 Gemma 4 Thinking Mode
+### 🛡️ Permission-first tool execution
 
-Helix-Swarm can detect Gemma 4-style model names and enable thinking mode automatically.
-
-```text
-google/gemma-4-e4b → thinking enabled
-other models       → normal mode
-```
-
-Thinking output is filtered before being saved into memory, reducing repeated injection of internal reasoning.
-
-### 🧠 Gemma 4 Thinking 模式
-
-Helix-Swarm 可以根据模型名称自动识别 Gemma 4 系列，并开启 thinking mode。
-
-```text
-google/gemma-4-e4b → 自动开启 thinking
-其他模型            → 普通模式
-```
-
-系统会过滤 thinking 输出，避免把内部推理内容反复写入记忆。
-
----
-
-### 🛡️ Permission-Gated Tool Execution
-
-Low-risk tools can be auto-approved:
+Low-risk tools can be allowed automatically:
 
 ```text
 read_file
@@ -161,7 +153,7 @@ list_directory
 delegate_to_expert
 ```
 
-High-risk tools require confirmation:
+Risky tools require review:
 
 ```text
 execute_terminal
@@ -173,7 +165,7 @@ edit_file
 skillhub install
 ```
 
-Approval UI:
+Review choices:
 
 ```text
 Y = Approve
@@ -181,42 +173,27 @@ N = Deny
 B = Block this tool for this session
 ```
 
-### 🛡️ 工具调用权限审查
+---
 
-低风险工具可以自动允许：
+### 🧾 Evidence Card review
 
-```text
-read_file
-glob_files
-grep_code
-find_skills
-list_directory
-delegate_to_expert
-```
-
-高风险工具需要用户确认：
+For review, audit, security, permission, and bug-finding tasks, Helix-Swarm forces structured evidence.
 
 ```text
-execute_terminal
-pip install
-curl ... | bash
-delete_file
-write_file
-edit_file
-skillhub install
+Evidence Card 1
+- File:
+- Symbol:
+- Evidence:
+- Why risky:
+- Consequence:
+- Suggested fix:
 ```
 
-审查选项：
-
-```text
-Y = 确认执行
-N = 拒绝本次
-B = 禁止该工具本会话继续调用
-```
+This makes the reviewer less like a vague security report generator and more like a traceable code auditor.
 
 ---
 
-### 📚 SkillHub Integration
+### 🧩 Skill-aware agent workflow
 
 Helix-Swarm can search and compare SkillHub skills before installing them.
 
@@ -233,79 +210,42 @@ Compare calendar-cli, google-calendar, and google-calendar-api.
 Do not install anything.
 ```
 
-The agent is instructed to rely on actual tool output rather than guessing from names.
+The goal is not just “install skills”, but:
 
-### 📚 SkillHub 集成
+```text
+Search → Compare → Explain → Ask → Install
+```
 
-Helix-Swarm 可以搜索和比较 SkillHub 技能，在安装前先给出分析。
+---
 
-例如：
+### 🖥️ Terminal control layer
+
+The terminal is the control surface.
+
+Helix-Swarm is designed around a simple CLI loop where users can chat, inspect tools, switch models, change language, review permissions, and run commands with approval.
 
 ```bash
-skillhub search calendar
+/set lang en
+/set lang zh
+/permission
+/models
+/stats
 ```
-
-然后让 Agent 比较：
-
-```text
-比较 calendar-cli、google-calendar、google-calendar-api。
-不要安装。
-```
-
-系统会要求 Agent 基于真实工具输出，而不是只根据名字猜测。
 
 ---
 
-### 🧾 Evidence Card Review
+### 📄 File-aware agent context
 
-For review, audit, security, permission, and bug-finding tasks, Helix-Swarm forces structured evidence.
+Helix-Swarm can detect local file paths and route them into the file-reading workflow.
 
-Example:
-
-```text
-Evidence Card 1
-- File:
-- Symbol:
-- Evidence:
-- Why risky:
-- Consequence:
-- Suggested fix:
-```
-
-This helps reduce generic security advice and makes each finding traceable.
-
-### 🧾 证据卡审查
-
-对于代码审查、安全审查、权限分析、找 bug 等任务，Helix-Swarm 会要求输出结构化证据卡。
-
-格式：
-
-```text
-Evidence Card 1
-- 文件路径 / File:
-- 函数 / 类 / 规则名 / Symbol:
-- 证据 / Evidence:
-- 风险原因 / Why risky:
-- 可能后果 / Consequence:
-- 修复建议 / Suggested fix:
-```
-
-这样可以减少泛泛而谈，让每个结论都能追溯到具体文件和函数。
-
----
-
-### 📄 Local File Reading
-
-Helix-Swarm can detect local file paths and route them to file-reading tools.
-
-Supported depending on installed dependencies:
+Supported depending on installed extractors:
 
 ```text
 PDF
 DOCX
 TXT
 Markdown
-source code files
+source files
 project files
 ```
 
@@ -315,32 +255,11 @@ Example:
 Read /Users/you/Desktop/resume.pdf and summarize improvements.
 ```
 
-### 📄 本地文件读取
-
-Helix-Swarm 可以识别本地文件路径，并调用文件读取工具。
-
-根据依赖支持：
-
-```text
-PDF
-DOCX
-TXT
-Markdown
-源代码文件
-项目文件
-```
-
-示例：
-
-```text
-读取 /Users/you/Desktop/resume.pdf，然后总结可以优化的地方。
-```
-
 ---
 
-### 🌐 Chinese / English CLI Switching
+### 🌐 Bilingual CLI
 
-Switch language:
+Switch language inside the CLI:
 
 ```bash
 /set lang en
@@ -355,28 +274,18 @@ tool review panels
 agent reply labels
 system language instruction
 Evidence Card templates
-local compute balance label
+local compute labels
 ```
 
-### 🌐 中英文 CLI 切换
+---
 
-切换语言：
+### 🧠 Model-flexible backend
 
-```bash
-/set lang en
-/set lang zh
-```
+Helix-Swarm works with local or OpenAI-compatible endpoints.
 
-会影响：
+It can use local model servers such as LM Studio, or a custom API endpoint.
 
-```text
-CLI 状态栏
-工具审查面板
-Agent 回复标签
-系统语言提示词
-Evidence Card 模板
-本地算力余额标签
-```
+Some models may support additional abilities such as thinking or vision, but Helix-Swarm’s main value is the permission-first workflow around tool use.
 
 ---
 
@@ -388,15 +297,15 @@ User Input
     ▼
 CLI Router
     │
-    ├── Direct shell command detector
-    │       └── Permission review
-    │
-    ├── Slash command handler
+    ├── Slash Commands
     │       ├── /set
     │       ├── /reload
     │       ├── /models
     │       ├── /permission
     │       └── /stats
+    │
+    ├── Direct Command Detector
+    │       └── Permission Review
     │
     └── Leo Supervisor Agent
             │
@@ -426,15 +335,15 @@ CLI Router
     ▼
 CLI 路由器
     │
-    ├── 直接终端命令检测
-    │       └── 权限审查
-    │
-    ├── Slash 命令处理
+    ├── Slash 命令
     │       ├── /set
     │       ├── /reload
     │       ├── /models
     │       ├── /permission
     │       └── /stats
+    │
+    ├── 直接终端命令检测
+    │       └── 权限审查
     │
     └── Leo Supervisor Agent
             │
@@ -490,14 +399,14 @@ Helix-Swarm/
 
 ## ⚡ Installation / 安装
 
-### 1. Clone the repository / 克隆仓库
+### 1. Clone / 克隆仓库
 
 ```bash
 git clone https://github.com/Yule-Cai/Helix-Swarm.git
 cd Helix-Swarm
 ```
 
-### 2. Create a Python environment / 创建 Python 环境
+### 2. Create environment / 创建环境
 
 ```bash
 python3 -m venv .venv
@@ -517,47 +426,22 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-### 4. Start a local model server / 启动本地模型服务
+### 4. Configure model endpoint / 配置模型接口
 
-Recommended / 推荐：
-
-```text
-LM Studio
-Gemma 4 E4B / E2B
-Qwen Coder models
-Any OpenAI-compatible endpoint
-```
-
-Default endpoint example / 默认接口示例：
-
-```text
-http://localhost:1234/v1/chat/completions
-```
-
-### 5. Start Helix-Swarm / 启动 Helix-Swarm
-
-```bash
-python3 cli.py
-```
-
----
-
-## ⚙️ Configuration / 配置
-
-Create local config:
+Example:
 
 ```bash
 cp helix_config.example.json helix_config.json
 ```
 
-Example:
+Example config:
 
 ```json
 {
   "active": "local",
   "local": {
     "url": "http://localhost:1234/v1/chat/completions",
-    "model": "google/gemma-4-e4b",
+    "model": "your-model-name",
     "api_key": "not-needed"
   },
   "custom": {
@@ -572,9 +456,11 @@ Example:
 }
 ```
 
-Do not commit real local config if it contains API keys, private endpoints, logs, or personal paths.
+### 5. Start / 启动
 
-如果你的配置包含 API key、私有端点、日志或个人路径，不要提交真实的 `helix_config.json`。
+```bash
+python3 cli.py
+```
 
 ---
 
@@ -601,22 +487,6 @@ hello
 
 ---
 
-### Switch model / 切换模型
-
-```bash
-/set model google/gemma-4-e4b
-```
-
----
-
-### Search SkillHub skills / 搜索 SkillHub 技能
-
-```bash
-skillhub search calendar
-```
-
----
-
 ### Compare skills before installing / 安装前比较技能
 
 ```text
@@ -633,19 +503,7 @@ Do not install anything.
 
 ---
 
-### Read a local file / 读取本地文件
-
-```text
-Read /Users/you/Desktop/resume.pdf and summarize the key improvements.
-```
-
-```text
-读取 /Users/you/Desktop/resume.pdf，然后总结可以优化的地方。
-```
-
----
-
-### Review the project / 审查项目
+### Review a project with evidence / 基于证据审查项目
 
 ```text
 Review the current Helix-Swarm project and identify 3 concrete risks.
@@ -655,6 +513,18 @@ Read-only. Do not modify code.
 ```text
 审查当前 Helix-Swarm 项目，找出 3 个具体风险点。
 只读，不要修改代码。
+```
+
+Expected output:
+
+```text
+Evidence Card 1
+- File:
+- Symbol:
+- Evidence:
+- Why risky:
+- Consequence:
+- Suggested fix:
 ```
 
 ---
@@ -683,9 +553,9 @@ Helix-Swarm 会在执行高风险命令前请求确认。
 | File write/edit/delete | Reviewed | 写入、编辑、删除文件需要审查 |
 | Dangerous shell patterns | High-risk review | 危险 shell 模式会进入高风险审查 |
 
-Helix-Swarm is not a full OS sandbox. It is a local agent framework with permission gates.
+Helix-Swarm is not a full operating-system sandbox. It is a local agent framework with permission gates.
 
-Helix-Swarm 不是完整操作系统沙箱，而是带权限审查的本地 Agent 框架。
+Helix-Swarm 不是完整操作系统沙箱，而是一个带权限审查的本地 Agent 框架。
 
 Do not approve commands you do not understand.
 
@@ -706,7 +576,7 @@ Before publishing a new version, test:
 6. Read a local PDF
 7. Review current project with Evidence Cards
 8. rm -rf /Users/you/Desktop/test_folder
-9. Ask a logic question and check Gemma 4 thinking logs
+9. Compare multiple skills without installing
 ```
 
 Expected behavior:
@@ -716,7 +586,7 @@ Low-risk queries run smoothly.
 High-risk commands require approval.
 Review answers include file/symbol/evidence.
 Language switching changes CLI and agent output.
-Thinking mode starts for Gemma 4 models.
+Risky tool calls remain visible.
 ```
 
 中文预期：
@@ -726,21 +596,15 @@ Thinking mode starts for Gemma 4 models.
 高风险命令必须确认。
 审查回答必须包含文件、函数和证据。
 语言切换会影响 CLI 和 Agent 输出。
-Gemma 4 模型会触发 thinking mode。
+高风险工具调用保持可见。
 ```
 
 ---
 
 ## 🗺 Roadmap / 路线图
 
-- [x] CLI-first local agent loop  
-      CLI 优先的本地 Agent 主循环
-
-- [x] Local / custom API configuration  
-      本地 / 自定义 API 配置
-
-- [x] SkillHub search integration  
-      SkillHub 搜索集成
+- [x] CLI-first agent control layer  
+      CLI 优先的 Agent 控制层
 
 - [x] Permission-gated terminal execution  
       终端执行权限审查
@@ -748,66 +612,29 @@ Gemma 4 模型会触发 thinking mode。
 - [x] Evidence Card review mode  
       证据卡审查模式
 
-- [x] Gemma 4 thinking mode detection  
-      Gemma 4 thinking mode 自动识别
+- [x] Skill-aware workflow  
+      技能感知工作流
 
 - [x] Chinese / English CLI switching  
       中英文 CLI 切换
 
-- [x] PDF text reading  
-      PDF 文本读取
-
-- [ ] `/image` command for vision models  
-      支持视觉模型的 `/image` 命令
-
-- [ ] PDF page-to-image visual understanding  
-      PDF 页面转图片并进行视觉理解
-
-- [ ] Unified `/file` pipeline for PDF / DOCX / XLSX / images / ZIP  
-      统一 `/file` 管线，支持 PDF / DOCX / XLSX / 图片 / ZIP
+- [x] Local file reading  
+      本地文件读取
 
 - [ ] Stronger reviewer verifier  
       更强的审查验证器
 
-- [ ] GitHub Pages documentation site  
-      GitHub Pages 文档站点
+- [ ] Unified `/file` pipeline for PDF / DOCX / XLSX / images / ZIP  
+      统一 `/file` 管线，支持 PDF / DOCX / XLSX / 图片 / ZIP
+
+- [ ] `/image` command for vision-capable models  
+      面向视觉模型的 `/image` 命令
+
+- [ ] More skill adapters  
+      更多 Skill 适配器
 
 - [ ] Optional lightweight Web UI  
       可选轻量 Web UI
-
----
-
-## 🧠 Recommended Models / 推荐模型
-
-| Model Type | Recommended Use | 中文说明 |
-|---|---|---|
-| Gemma 4 E4B / E2B | Local thinking + general agent tasks | 本地 thinking 和通用 Agent 任务 |
-| Qwen Coder | Code-heavy workflows | 代码任务 |
-| DeepSeek Coder | Code generation and debugging | 代码生成和调试 |
-| Larger local models | Better project review and multi-file reasoning | 更好的项目审查和多文件推理 |
-
-Gemma 4 is useful because Helix-Swarm can trigger thinking mode automatically when the model name matches Gemma 4-style identifiers.
-
-Gemma 4 很适合 Helix-Swarm，因为系统可以根据模型名称自动触发 thinking mode。
-
----
-
-## 🌍 Language / 语言
-
-Helix-Swarm is designed for bilingual use.
-
-Helix-Swarm 面向中英文双语使用。
-
-```bash
-/set lang en
-/set lang zh
-```
-
-Single-file bilingual README:
-
-```text
-README.md
-```
 
 ---
 
@@ -820,23 +647,23 @@ Issues and pull requests are welcome.
 Good first contribution areas:
 
 ```text
+Better permission rules
 Better file extractors
-More robust permission rules
 More SkillHub adapters
-Vision input support
-Better documentation
-More language translations
+Reviewer verification
+Documentation
+Language translations
 ```
 
 适合贡献的方向：
 
 ```text
-更好的文件提取器
 更稳的权限规则
+更好的文件提取器
 更多 SkillHub 适配
-视觉输入支持
-更好的文档
-更多语言翻译
+审查验证器
+文档优化
+多语言翻译
 ```
 
 ---
@@ -850,10 +677,6 @@ Helix-Swarm 可以在确认后执行本地工具和终端命令。
 Use it carefully.
 
 请谨慎使用。
-
-Do not approve commands you do not understand.
-
-不要确认你不理解的命令。
 
 Avoid committing:
 
